@@ -15,9 +15,14 @@ impl Application {
 
         self::Application::my_label(self, ui, "Audio".to_string());
 
+        // .on_hover_ui(|ui| {
+        //                 ui.label("Extensions:: | doc | docx | txt | xls | pdf | ppt | vcs | zip |");
+        //             })
+        
         if ui.add(image_button).clicked() {
             //
             self.flag_checkbox_audios = !self.flag_checkbox_audios;
+            self.filter_search_filetype[0] = !self.flag_checkbox_audios;
             //
             if self.flag_checkbox_audios {
                 self.image_checkbox_audios = RetainedImage::from_image_bytes(
@@ -49,6 +54,7 @@ impl Application {
         if ui.add(image_button).clicked() {
             //
             self.flag_checkbox_documents = !self.flag_checkbox_documents;
+            self.filter_search_filetype[1] = !self.flag_checkbox_documents;
             //
             if self.flag_checkbox_documents {
                 self.image_checkbox_documents = RetainedImage::from_image_bytes(
@@ -81,6 +87,7 @@ impl Application {
         if ui.add(image_button).clicked() {
             //
             self.flag_checkbox_images = !self.flag_checkbox_images;
+            self.filter_search_filetype[2] = !self.flag_checkbox_images;
             //
             if self.flag_checkbox_images {
                 self.image_checkbox_images = RetainedImage::from_image_bytes(
@@ -113,6 +120,7 @@ impl Application {
         if ui.add(image_button).clicked() {
             //
             self.flag_checkbox_others = !self.flag_checkbox_others;
+            self.filter_search_filetype[3] = !self.flag_checkbox_others;
             //
             if self.flag_checkbox_others {
                 self.image_checkbox_others = RetainedImage::from_image_bytes(
@@ -145,6 +153,7 @@ impl Application {
         if ui.add(image_button).clicked() {
             //
             self.flag_checkbox_videos = !self.flag_checkbox_videos;
+            self.filter_search_filetype[4] = !self.flag_checkbox_videos;
             //
             if self.flag_checkbox_videos {
                 self.image_checkbox_videos = RetainedImage::from_image_bytes(
