@@ -134,6 +134,27 @@ impl epi::App for Application {
     fn setup(&mut self, ctx: &egui::Context, _frame: &epi::Frame, _storage: Option<&dyn Storage>) {}
 
     fn update(&mut self, ctx: &egui::Context, frame: &epi::Frame) {
+        let my_frame0 = egui::containers::Frame {
+            margin: egui::style::Margin {
+                left: 10.,
+                right: 2.,
+                top: 5.,
+                bottom: 2.,
+            },
+            rounding: egui::Rounding {
+                nw: 1.0,
+                ne: 1.0,
+                sw: 1.0,
+                se: 1.0,
+            },
+            shadow: eframe::epaint::Shadow {
+                extrusion: 0.0,
+                color: Color32::TRANSPARENT,
+            },
+            fill: Color32::from_rgb(244, 244, 244),
+            stroke: egui::Stroke::new(0.0, Color32::from_rgb(244, 244, 244)),
+        };
+
         let my_frame1 = egui::containers::Frame {
             margin: egui::style::Margin {
                 left: 10.,
@@ -179,57 +200,64 @@ impl epi::App for Application {
         egui::SidePanel::left("left_panel")
             .frame(my_frame2)
             .show(ctx, |ui| {
-                ui.add_space(35.);
+                ui.add_space(70.);
                 self::Application::left_menu(self, ui, ctx);
             });
 
         egui::TopBottomPanel::top("top_panel")
             .frame(my_frame2)
             .show(ctx, |ui| {
-                ui.with_layout(egui::Layout::left_to_right(), |ui| {
-                    //DIRECTORY IMAGE
-                    let image_size = self.image_filter.size_vec2();
-                    let image_button = egui::ImageButton::new(
-                        self.image_directory.texture_id(ctx),
-                        [image_size.x / 2., image_size.y / 2.],
-                    )
-                    .frame(false);
-
-                    if ui.add(image_button).clicked() {}
-                    self::Application::my_label(self, ui, "/Users/matthew/documents".to_string());
-
-                    //FILTER IMAGE, RUN IMAGE, TIMER IMAGE
-                    ui.with_layout(egui::Layout::right_to_left(), |ui| {
-                        //FILTER IMAGE
+                ui.group(|ui| {
+                    ui.with_layout(egui::Layout::left_to_right(), |ui| {
+                        //DIRECTORY IMAGE
                         let image_size = self.image_filter.size_vec2();
                         let image_button = egui::ImageButton::new(
-                            self.image_filter.texture_id(ctx),
-                            [image_size.x / 2., image_size.y / 2.],
-                        )
-                        .frame(false);
-
-                        ui.add_space(10.);
-                        if ui.add(image_button).clicked() {}
-
-                        //RUN IMAGE
-                        let image_size = self.image_filter.size_vec2();
-                        let image_button = egui::ImageButton::new(
-                            self.image_run.texture_id(ctx),
+                            self.image_directory.texture_id(ctx),
                             [image_size.x / 2., image_size.y / 2.],
                         )
                         .frame(false);
 
                         if ui.add(image_button).clicked() {}
+                        self::Application::my_label(
+                            self,
+                            ui,
+                            "/Users/matthew/documents".to_string(),
+                        );
 
-                        //Timer IMAGE
-                        let image_size = self.image_filter.size_vec2();
-                        let image_button = egui::ImageButton::new(
-                            self.image_timer.texture_id(ctx),
-                            [image_size.x / 2., image_size.y / 2.],
-                        )
-                        .frame(false);
+                        //FILTER IMAGE, RUN IMAGE, TIMER IMAGE
+                        ui.with_layout(egui::Layout::right_to_left(), |ui| {
+                            //FILTER IMAGE
+                            let image_size = self.image_filter.size_vec2();
+                            let image_button = egui::ImageButton::new(
+                                self.image_filter.texture_id(ctx),
+                                [image_size.x / 2., image_size.y / 2.],
+                            )
+                            .frame(false);
 
-                        if ui.add(image_button).clicked() {}
+                            ui.add_space(10.);
+                            if ui.add(image_button).clicked() {}
+
+                            //RUN IMAGE
+                            let image_size = self.image_filter.size_vec2();
+                            let image_button = egui::ImageButton::new(
+                                self.image_run.texture_id(ctx),
+                                [image_size.x / 2., image_size.y / 2.],
+                            )
+                            .frame(false);
+
+                            if ui.add(image_button).clicked() {}
+
+                            //Timer IMAGE
+                            let image_size = self.image_filter.size_vec2();
+                            let image_button = egui::ImageButton::new(
+                                self.image_timer.texture_id(ctx),
+                                [image_size.x / 2., image_size.y / 2.],
+                            )
+                            .frame(false);
+
+                            if ui.add(image_button).clicked() {}
+                            self::Application::my_label(self, ui, ".0023424s".to_string());
+                        });
                     });
                 });
             });
@@ -237,6 +265,7 @@ impl epi::App for Application {
         egui::TopBottomPanel::top("top_panel2")
             .frame(my_frame2)
             .show(ctx, |ui| {
+                //ui.group(|ui| {
                 ui.with_layout(egui::Layout::left_to_right(), |ui| {
                     self::Application::checkbox_audio(self, ui, ctx);
                     self::Application::checkbox_documents(self, ui, ctx);
@@ -267,40 +296,76 @@ impl epi::App for Application {
                     ui.add(
                         egui::TextEdit::singleline(&mut self.fuzzy_search)
                             .code_editor()
-                            .desired_width(310.),
+                            .desired_width(300.),
                     );
                 });
+                //});
             });
 
         egui::TopBottomPanel::bottom("bottom_panel")
-            .frame(my_frame1)
+            .frame(my_frame2)
             .show(ctx, |ui| {
-                self::Application::my_label(self, ui, "bottom".to_string());
+                ScrollArea::vertical()
+                    .id_source("bottom_scroll")
+                    .auto_shrink([false, false])
+                    .max_height(400.) 
+                    .stick_to_right()
+                    .show(ui, |ui| {
+                        self::Application::my_label(self, ui, "bottom".to_string());
+                    }); //end of scroll
             });
 
         egui::CentralPanel::default()
             .frame(my_frame2)
             .show(ctx, |ui| {
-                //self.image.show_scaled(ui, 0.1);
+                //ScrollArea aTable ScrollAreaOutput<()>
+                let row_height = 35.0;
+                ScrollArea::vertical()
+                    .id_source("main_scroll")
+                    .auto_shrink([false, false])
+                    //.max_height(500.)
+                    .stick_to_right()
+                    .show_rows(ui, row_height, 100, |ui, row_range| {
+                        for row in row_range {
+                            // let (title, adjusted_byte, file_count) =
+                            //     get_table_fields(vec_table[row].clone());
 
-                /* let response = ui.label("hello................");
-                //println!("response='{:?}'", response);
-                assert!(!response.clicked()); // labels don't sense clicks
-                let response = response.interact(egui::Sense::click());
-                if response.clicked() {
-                    println!("something...") ;
-                } */
-
-                /* ui.group(|ui| {
-                    let x = ui.id();
-                    //println!("x='{:?}'", x);
-                    ui.set_visible(false);
-                    ui.checkbox(&mut self.filter_all, "Enable subsection");
-                    ui.set_enabled(self.filter_all);
-                    if ui.button("Button that is not always clickable").clicked() { /* … */ }
-                });
-
-                if ui.button("Button that IS always clickable").clicked() { /* … */ } */
+                            egui::Grid::new("grid_main_labels")
+                                .striped(true)
+                                .num_columns(3)
+                                .spacing(egui::Vec2::new(0.0, 0.0))
+                                .show(ui, |ui| {
+                                    if ui
+                                        .add_sized(
+                                            [970.0, 35.0],
+                                            egui::Button::new(
+                                                egui::RichText::new("filename")
+                                                    .color(egui::Color32::from_rgb(255, 255, 255)),
+                                            )
+                                            .fill(egui::Color32::from_rgb(49, 90, 125)),
+                                        )
+                                        .clicked()
+                                    {}
+                                    ui.add_sized(
+                                        [100.0, 35.0],
+                                        egui::Button::new(
+                                            egui::RichText::new("file_count")
+                                                .color(egui::Color32::from_rgb(45, 51, 59)),
+                                        )
+                                        .fill(egui::Color32::from_rgb(49, 90, 125)),
+                                    );
+                                    ui.add_sized(
+                                        [100.0, 35.0],
+                                        egui::Button::new(
+                                            egui::RichText::new("asjusted_bytes")
+                                                .color(egui::Color32::from_rgb(45, 51, 59)),
+                                        )
+                                        .fill(egui::Color32::from_rgb(49, 90, 125)),
+                                    );
+                                    ui.end_row();
+                                });
+                        }
+                    }); //end of scroll
             });
     }
 

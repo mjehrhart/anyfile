@@ -1,4 +1,4 @@
-use egui::Color32;
+use egui::{Color32, ScrollArea};
 use egui_extras::RetainedImage;
 
 use super::controller::Application;
@@ -182,4 +182,8 @@ impl Application {
     pub fn toggle2(on: &mut bool) -> impl egui::Widget + '_ {
         move |ui: &mut egui::Ui| toggle_ui2(ui, on)
     } */
+
+ 
+
+
 }
