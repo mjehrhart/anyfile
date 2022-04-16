@@ -5,25 +5,21 @@ use eframe::{
 use egui::{Color32, ScrollArea, Sense};
 use egui_extras::RetainedImage;
 
-use crate::{finder::finder, enums::enums, file::meta::Meta};
+use crate::{enums::enums, file::meta::Meta, finder::finder};
 
-#[derive(Clone, Debug )]
+#[derive(Clone, Debug)]
 pub struct DupeTable {
     pub name: String,
     pub count: i32,
     pub checksum: String,
-    pub list: Vec<Meta>, 
+    pub list: Vec<Meta>,
     pub file_type: enums::FileType,
     pub visible: bool,
 }
 
-
 pub struct Application {
     pub dupe_table: Vec<DupeTable>,
-    // pub staging: Vec<Vec<DupeTable>>, 
-    // pub a: finder::Finder,
     pub finder: finder::Finder,
-    // pub c: Vec<file::meta::Meta>,
     pub directory: String,
     //
     pub time_elapsed: std::time::Duration,
@@ -57,22 +53,21 @@ pub struct Application {
     pub image_timer: RetainedImage,
     pub image: RetainedImage,
     pub image2: RetainedImage,
-    // 
+    //
     pub sort_by: [String; 3],
     pub sort_by_index: usize,
     pub pager_size: Vec<usize>,
     pub fuzzy_search: String,
 }
 
-// from_svg_bytes [true, true, false, false, true]
+// from_svg_bytes
 // from_image_bytes
-// hovered
-// on_hover_ui
+
 impl Application {
     pub fn default() -> Self {
         Self {
-            dupe_table: vec![],             //ui uses this for show and tell
-            finder:finder::Finder::new(),   //runs the search
+            dupe_table: vec![],            //ui uses this for show and tell
+            finder: finder::Finder::new(), //runs the search
             directory: String::from("/Users/matthew/zz/file_types"),
             //
             time_elapsed: std::time::Duration::new(0, 0),
@@ -196,6 +191,7 @@ impl epi::App for Application {
 
         egui::SidePanel::left("left_panel")
             .frame(frame_style_1)
+            .min_width(113.)
             .show(ctx, |ui| {
                 ui.add_space(70.);
                 self::Application::left_menu(self, ui, ctx);
@@ -216,7 +212,7 @@ impl epi::App for Application {
                         .max_height(400.)
                         .stick_to_right()
                         .show(ui, |ui| {
-                            self::Application::my_label(self, ui, "bottom".to_string());
+                            self::Application::add_label(self, ui, "bottom".to_string());
                         }); //end of scroll
                 });
             });

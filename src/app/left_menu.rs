@@ -1,83 +1,91 @@
+//! Left side of app - the side filters
+
 use egui::{Color32, ScrollArea};
 use egui_extras::RetainedImage;
 
+use super::controller::Application;
 use crate::{enums::enums, finder::finder};
 
-use super::controller::Application;
-
 impl Application {
-    pub fn my_label(&mut self, ui: &mut egui::Ui, text: String) {
+    pub fn add_label(&mut self, ui: &mut egui::Ui, text: String) {
         ui.add(egui::Label::new(
             egui::RichText::new(text).color(egui::Color32::from_rgb(244, 244, 244)),
         ));
     }
-  
+
+    pub fn add_label_with_hover(&mut self, ui: &mut egui::Ui, text: String, hover_text: String) {
+        ui.add(egui::Label::new(
+            egui::RichText::new(text).color(egui::Color32::from_rgb(244, 244, 244)),
+        ))
+        .on_hover_ui(|ui| {
+            ui.label(hover_text);
+        });
+    }
+
+    pub fn set_toggle_name(&self, name: &str, index: usize) -> String {
+        let audio_name = [name, &self.filters_filetype_counters[index].to_string()].join(" ");
+
+        audio_name
+    }
+    pub fn add_toggle_filter(&mut self, ui: &mut egui::Ui) {
+        let color32_green = Color32::from_rgb(70, 180, 120);
+        ui.add_space(10.0);
+
+        let name = self::Application::set_toggle_name(&self, "🎵 Audio ::", 0);
+        if ui
+            .add(self::Application::toggle(
+                &mut self.filter_audios,
+                color32_green,
+                name,
+            ))
+            .clicked()
+        {
+            if self.filter_audios {
+                for mut collection in &mut self.dupe_table[..] {
+                    if collection.file_type == enums::FileType::Audio {
+                        collection.visible = true;
+                    }
+                }
+            } else {
+                for mut collection in &mut self.dupe_table[..] {
+                    if collection.file_type == enums::FileType::Audio {
+                        collection.visible = false;
+                    }
+                }
+            }
+        }
+    }
+
     pub fn left_menu(&mut self, ui: &mut egui::Ui, ctx: &egui::Context) {
-        let color32_blue = Color32::from_rgb(123, 167, 204);
+        //let color32_blue = Color32::from_rgb(123, 167, 204);
         let color32_blue_2 = Color32::from_rgb(70, 130, 180);
         let color32_purple = Color32::from_rgb(180, 70, 75);
         let color32_orange = Color32::from_rgb(180, 120, 70);
         let color32_green = Color32::from_rgb(70, 180, 120);
         let color32_green_2 = Color32::from_rgb(180, 175, 70);
 
-        //ui.add_space(15.0);
-        /* if ui
-            .add(self::Application::toggle(
-                &mut self.filter_all,
-                color32_blue,
-                "All".to_string(),
-            ))
-            .clicked()
-        {
-            if self.filter_all {
-                self.filter_audios = true;
-                self.filter_documents = true;
-                self.filter_images = true;
-                self.filter_videos = true;
-                self.filter_others = true;
-            } else {
-                self.filter_audios = false;
-                self.filter_documents = false;
-                self.filter_images = false;
-                self.filter_videos = false;
-                self.filter_others = false;
-            }
+        //let mut x = self.filter_audios;
+        //self::Application::add_toggle_filter( self, ui,  );
 
-            self.image = RetainedImage::from_image_bytes(
-                "Filter",
-                include_bytes!("../../resources/unchecked.png"),
-            )
-            .unwrap();
-        }; */
-
+        // AUDIO
         ui.add_space(10.0);
-        let audio_name = [
-            "🎵 Audio ::",
-            &self.filters_filetype_counters[0].to_string(),
-        ]
-        .join(" ");
+        let name = self::Application::set_toggle_name(&self, "🎵 Audio ::", 0);
         if ui
             .add(self::Application::toggle(
                 &mut self.filter_audios,
-                color32_purple,
-                audio_name,
+                color32_green,
+                name,
             ))
             .clicked()
         {
-            // self::Application::filter_hashmap_by_filetype(self.b.clone(), self.ctrl_filter_filetype);
-            println!("self.filter_audios => {}", self.filter_audios );
             if self.filter_audios {
-                let table = self.dupe_table.clone();
-                for mut collection in table.into_iter() {
-                  
+                for mut collection in &mut self.dupe_table[..] {
                     if collection.file_type == enums::FileType::Audio {
                         collection.visible = true;
                     }
                 }
             } else {
-                let table = self.dupe_table.clone();
-                for mut collection in table.into_iter() {
-                  
+                for mut collection in &mut self.dupe_table[..] {
                     if collection.file_type == enums::FileType::Audio {
                         collection.visible = false;
                     }
@@ -85,46 +93,112 @@ impl Application {
             }
         }
 
+        // DOCUMENTS
         ui.add_space(10.0);
-        let name = [
-            "📎 Documents ::",
-            &self.filters_filetype_counters[1].to_string(),
-        ]
-        .join(" ");
-        ui.add(self::Application::toggle(
-            &mut self.filter_documents,
-            color32_orange,
-            name,
-        ));
+        let name = self::Application::set_toggle_name(&self, "📎 Docs ::", 1);
+        //let name = ["📎 Docs ::", &self.filters_filetype_counters[1].to_string()].join(" ");
+        if ui
+            .add(self::Application::toggle(
+                &mut self.filter_documents,
+                color32_orange,
+                name,
+            ))
+            .clicked()
+        {
+            if self.filter_documents {
+                for mut collection in &mut self.dupe_table[..] {
+                    if collection.file_type == enums::FileType::Document {
+                        collection.visible = true;
+                    }
+                }
+            } else {
+                for mut collection in &mut self.dupe_table[..] {
+                    if collection.file_type == enums::FileType::Document {
+                        collection.visible = false;
+                    }
+                }
+            }
+        }
+
+        // IMAGES
         ui.add_space(10.0);
-        let name = [
-            "🖼  Images ::",
-            &self.filters_filetype_counters[2].to_string(),
-        ]
-        .join(" ");
-        ui.add(self::Application::toggle(
-            &mut self.filter_images,
-            color32_green,
-            name,
-        ));
+
+        let name = self::Application::set_toggle_name(&self, "🖼  Images ::", 2);
+        if ui
+            .add(self::Application::toggle(
+                &mut self.filter_images,
+                color32_purple,
+                name,
+            ))
+            .clicked()
+        {
+            if self.filter_images {
+                for mut collection in &mut self.dupe_table[..] {
+                    if collection.file_type == enums::FileType::Image {
+                        collection.visible = true;
+                    }
+                }
+            } else {
+                for mut collection in &mut self.dupe_table[..] {
+                    if collection.file_type == enums::FileType::Image {
+                        collection.visible = false;
+                    }
+                }
+            }
+        }
+
+        // OTHERS
         ui.add_space(10.0);
-        let name = [
-            "📝 Other ::",
-            &self.filters_filetype_counters[3].to_string(),
-        ]
-        .join(" ");
-        ui.add(self::Application::toggle(
-            &mut self.filter_others,
-            color32_blue_2,
-            name,
-        ));
+        let name = self::Application::set_toggle_name(&self, "📝 Other ::", 3);
+        if ui
+            .add(self::Application::toggle(
+                &mut self.filter_others,
+                color32_blue_2,
+                name,
+            ))
+            .clicked()
+        {
+            if self.filter_others {
+                for mut collection in &mut self.dupe_table[..] {
+                    if collection.file_type == enums::FileType::Other {
+                        collection.visible = true;
+                    }
+                }
+            } else {
+                for mut collection in &mut self.dupe_table[..] {
+                    if collection.file_type == enums::FileType::Other {
+                        collection.visible = false;
+                    }
+                }
+            }
+        }
+
+        // VIDEOS
         ui.add_space(10.0);
-        let name = ["🎞 Video ::", &self.filters_filetype_counters[4].to_string()].join(" ");
-        ui.add(self::Application::toggle(
-            &mut self.filter_videos,
-            color32_green_2,
-            name,
-        ));
+        //let name = ["🎞 Video ::", &self.filters_filetype_counters[4].to_string()].join(" ");
+        let name = self::Application::set_toggle_name(&self, "🎞 Video ::", 4);
+        if ui
+            .add(self::Application::toggle(
+                &mut self.filter_videos,
+                color32_green_2,
+                name,
+            ))
+            .clicked()
+        {
+            if self.filter_videos {
+                for mut collection in &mut self.dupe_table[..] {
+                    if collection.file_type == enums::FileType::Video {
+                        collection.visible = true;
+                    }
+                }
+            } else {
+                for mut collection in &mut self.dupe_table[..] {
+                    if collection.file_type == enums::FileType::Video {
+                        collection.visible = false;
+                    }
+                }
+            }
+        }
         ui.add_space(30.0);
     }
 
