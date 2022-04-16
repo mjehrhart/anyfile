@@ -57,6 +57,7 @@ pub struct Application {
     pub sort_by: [String; 3],
     pub sort_by_index: usize,
     pub pager_size: Vec<usize>,
+    pub pager_size_index: usize,
     pub fuzzy_search: String,
 }
 
@@ -96,6 +97,7 @@ impl Application {
                 "Size".to_string(),
             ],
             pager_size: [3, 5, 10, 1_000, 10_000, 25_000, 35_000, 50_000, 100_000].to_vec(),
+            pager_size_index: 5,
             fuzzy_search: String::from(""),
             //
             image_checkbox_audios: RetainedImage::from_image_bytes(
