@@ -27,35 +27,7 @@ impl Application {
 
         audio_name
     }
-    pub fn add_toggle_filter(&mut self, ui: &mut egui::Ui) {
-        let color32_green = Color32::from_rgb(70, 180, 120);
-        ui.add_space(10.0);
-
-        let name = self::Application::set_toggle_name(&self, "🎵 Audio ::", 0);
-        if ui
-            .add(self::Application::toggle(
-                &mut self.filter_audios,
-                color32_green,
-                name,
-            ))
-            .clicked()
-        {
-            if self.filter_audios {
-                for mut collection in &mut self.dupe_table[..] {
-                    if collection.file_type == enums::FileType::Audio {
-                        collection.visible = true;
-                    }
-                }
-            } else {
-                for mut collection in &mut self.dupe_table[..] {
-                    if collection.file_type == enums::FileType::Audio {
-                        collection.visible = false;
-                    }
-                }
-            }
-        }
-    }
-
+ 
     pub fn left_menu(&mut self, ui: &mut egui::Ui, ctx: &egui::Context) {
         //let color32_blue = Color32::from_rgb(123, 167, 204);
         let color32_blue_2 = Color32::from_rgb(70, 130, 180);
@@ -68,7 +40,7 @@ impl Application {
         //self::Application::add_toggle_filter( self, ui,  );
 
         // AUDIO
-        ui.add_space(10.0);
+        ui.add_space(15.0);
         let name = self::Application::set_toggle_name(&self, "🎵 Audio ::", 0);
         if ui
             .add(self::Application::toggle(
@@ -79,22 +51,26 @@ impl Application {
             .clicked()
         {
             if self.filter_audios {
-                for mut collection in &mut self.dupe_table[..] {
-                    if collection.file_type == enums::FileType::Audio {
-                        collection.visible = true;
+                if !self.staging.is_empty() {
+                    for collection in &mut self.staging[self.selected_staging_index] {
+                        if collection.file_type == enums::FileType::Audio {
+                            collection.visible = true;
+                        }
                     }
                 }
             } else {
-                for mut collection in &mut self.dupe_table[..] {
-                    if collection.file_type == enums::FileType::Audio {
-                        collection.visible = false;
+                if !self.staging.is_empty() {
+                    for collection in &mut self.staging[self.selected_staging_index] {
+                        if collection.file_type == enums::FileType::Audio {
+                            collection.visible = false;
+                        }
                     }
                 }
             }
         }
 
         // DOCUMENTS
-        ui.add_space(10.0);
+        ui.add_space(15.0);
         let name = self::Application::set_toggle_name(&self, "📎 Docs ::", 1);
         //let name = ["📎 Docs ::", &self.filters_filetype_counters[1].to_string()].join(" ");
         if ui
@@ -106,24 +82,28 @@ impl Application {
             .clicked()
         {
             if self.filter_documents {
-                for mut collection in &mut self.dupe_table[..] {
-                    if collection.file_type == enums::FileType::Document {
-                        collection.visible = true;
+                if !self.staging.is_empty() {
+                    for collection in &mut self.staging[self.selected_staging_index] {
+                        if collection.file_type == enums::FileType::Document {
+                            collection.visible = true;
+                        }
                     }
                 }
             } else {
-                for mut collection in &mut self.dupe_table[..] {
-                    if collection.file_type == enums::FileType::Document {
-                        collection.visible = false;
+                if !self.staging.is_empty() {
+                    for collection in &mut self.staging[self.selected_staging_index] {
+                        if collection.file_type == enums::FileType::Document {
+                            collection.visible = false;
+                        }
                     }
                 }
             }
         }
 
         // IMAGES
-        ui.add_space(10.0);
+        ui.add_space(15.0);
 
-        let name = self::Application::set_toggle_name(&self, "🖼  Images ::", 2);
+        let name = self::Application::set_toggle_name(&self, "🖼 Images ::", 2);
         if ui
             .add(self::Application::toggle(
                 &mut self.filter_images,
@@ -133,22 +113,26 @@ impl Application {
             .clicked()
         {
             if self.filter_images {
-                for mut collection in &mut self.dupe_table[..] {
-                    if collection.file_type == enums::FileType::Image {
-                        collection.visible = true;
+                if !self.staging.is_empty() {
+                    for collection in &mut self.staging[self.selected_staging_index] {
+                        if collection.file_type == enums::FileType::Image {
+                            collection.visible = true;
+                        }
                     }
                 }
             } else {
-                for mut collection in &mut self.dupe_table[..] {
-                    if collection.file_type == enums::FileType::Image {
-                        collection.visible = false;
+                if !self.staging.is_empty() {
+                    for collection in &mut self.staging[self.selected_staging_index] {
+                        if collection.file_type == enums::FileType::Image {
+                            collection.visible = false;
+                        }
                     }
                 }
             }
         }
 
         // OTHERS
-        ui.add_space(10.0);
+        ui.add_space(15.0);
         let name = self::Application::set_toggle_name(&self, "📝 Other ::", 3);
         if ui
             .add(self::Application::toggle(
@@ -159,22 +143,26 @@ impl Application {
             .clicked()
         {
             if self.filter_others {
-                for mut collection in &mut self.dupe_table[..] {
-                    if collection.file_type == enums::FileType::Other {
-                        collection.visible = true;
+                if !self.staging.is_empty() {
+                    for collection in &mut self.staging[self.selected_staging_index] {
+                        if collection.file_type == enums::FileType::Other {
+                            collection.visible = true;
+                        }
                     }
                 }
             } else {
-                for mut collection in &mut self.dupe_table[..] {
-                    if collection.file_type == enums::FileType::Other {
-                        collection.visible = false;
+                if !self.staging.is_empty() {
+                    for collection in &mut self.staging[self.selected_staging_index] {
+                        if collection.file_type == enums::FileType::Other {
+                            collection.visible = false;
+                        }
                     }
                 }
             }
         }
 
         // VIDEOS
-        ui.add_space(10.0);
+        ui.add_space(15.0);
         //let name = ["🎞 Video ::", &self.filters_filetype_counters[4].to_string()].join(" ");
         let name = self::Application::set_toggle_name(&self, "🎞 Video ::", 4);
         if ui
@@ -186,15 +174,19 @@ impl Application {
             .clicked()
         {
             if self.filter_videos {
-                for mut collection in &mut self.dupe_table[..] {
-                    if collection.file_type == enums::FileType::Video {
-                        collection.visible = true;
+                if !self.staging.is_empty() {
+                    for collection in &mut self.staging[self.selected_staging_index] {
+                        if collection.file_type == enums::FileType::Video {
+                            collection.visible = true;
+                        }
                     }
                 }
             } else {
-                for mut collection in &mut self.dupe_table[..] {
-                    if collection.file_type == enums::FileType::Video {
-                        collection.visible = false;
+                if !self.staging.is_empty() {
+                    for collection in &mut self.staging[self.selected_staging_index] {
+                        if collection.file_type == enums::FileType::Video {
+                            collection.visible = false;
+                        }
                     }
                 }
             }

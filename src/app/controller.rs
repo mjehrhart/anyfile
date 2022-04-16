@@ -18,6 +18,7 @@ pub struct DupeTable {
 }
 
 pub struct Application {
+    pub staging: Vec<Vec<DupeTable>>,
     pub dupe_table: Vec<DupeTable>,
     pub finder: finder::Finder,
     pub directory: String,
@@ -58,6 +59,7 @@ pub struct Application {
     pub sort_by_index: usize,
     pub pager_size: Vec<usize>,
     pub pager_size_index: usize,
+    pub selected_staging_index: usize,
     pub fuzzy_search: String,
 }
 
@@ -67,6 +69,7 @@ pub struct Application {
 impl Application {
     pub fn default() -> Self {
         Self {
+            staging: vec![],               //used in paging
             dupe_table: vec![],            //ui uses this for show and tell
             finder: finder::Finder::new(), //runs the search
             directory: String::from("/Users/matthew/zz/file_types"),
@@ -96,8 +99,12 @@ impl Application {
                 "Name".to_string(),
                 "Size".to_string(),
             ],
-            pager_size: [3, 5, 10, 1_000, 10_000, 25_000, 35_000, 50_000, 100_000].to_vec(),
-            pager_size_index: 5,
+            pager_size: [
+                3, 5, 10, 100, 1_000, 10_000, 25_000, 35_000, 50_000, 100_000,
+            ]
+            .to_vec(),
+            pager_size_index: 3,
+            selected_staging_index: 0,
             fuzzy_search: String::from(""),
             //
             image_checkbox_audios: RetainedImage::from_image_bytes(
@@ -204,19 +211,89 @@ impl epi::App for Application {
         egui::TopBottomPanel::bottom("bottom_panel")
             .frame(frame_style_1)
             .show(ctx, |ui| {
-                ui.checkbox(&mut self.filter_audios, "Show subsection");
-                ui.add_visible_ui(self.filter_audios, |ui| {
-                    ui.label("Maybe you see this, maybe you don't!");
+                let _main_dir = egui::Direction::LeftToRight;
+                let _layout = egui::Layout::left_to_right()
+                    .with_main_wrap(true)
+                    .with_cross_align(egui::Align::Center);
 
-                    ScrollArea::vertical()
-                        .id_source("bottom_scroll")
-                        .auto_shrink([false, false])
-                        .max_height(400.)
-                        .stick_to_right()
-                        .show(ui, |ui| {
-                            self::Application::add_label(self, ui, "bottom".to_string());
-                        }); //end of scroll
-                });
+                egui::Grid::new("grid_main_labels")
+                    .spacing(egui::Vec2::new(0.0, 0.0))
+                    .show(ui, |ui| {
+                        //
+                        //TODO ui is showing extra button at the end
+                        for i in 0..self.staging.len() {
+                            if ui
+                                .add_sized([35.0, 35.0], egui::Button::new((i + 1).to_string()))
+                                .clicked()
+                            {
+                                self.selected_staging_index = i;
+                                println!(
+                                    "self.selected_staging_index:: {}",
+                                    self.selected_staging_index
+                                );
+
+                                // Clear counters
+                                // self.filters_filetype_counters = [0; 6];
+                                self.filter_audios = false;
+                                self.filter_documents = false;
+                                self.filter_images = false;
+                                self.filter_others = false;
+                                self.filter_videos = false;
+                                for item in &mut self.staging[self.selected_staging_index] {
+                                    match item.file_type {
+                                        enums::FileType::Audio => {
+                                            self.filter_audios = true;
+                                        }
+                                        enums::FileType::Document => {
+                                            self.filter_documents = true;
+                                        }
+                                        enums::FileType::Image => {
+                                            self.filter_images = true;
+                                        }
+                                        enums::FileType::Other => {
+                                            self.filter_others = true;
+                                        }
+                                        enums::FileType::Video => {
+                                            self.filter_videos = true;
+                                        }
+                                        enums::FileType::None => {}
+                                        enums::FileType::All => {}
+                                    }
+                                }
+
+                                /* for collection in d2.data_set.iter() {
+                                    let (_, v) = collection;
+
+                                    for row in v {
+                                        match row.file_type {
+                                            enums::enums::FileType::Audio => {
+                                                self.filter_audios = true;
+                                                self.filters_filetype_counters[0] += 1;
+                                            }
+                                            enums::enums::FileType::Document => {
+                                                self.filter_documents = true;
+                                                self.filters_filetype_counters[1] += 1;
+                                            }
+                                            enums::enums::FileType::Image => {
+                                                self.filter_images = true;
+                                                self.filters_filetype_counters[2] += 1;
+                                            }
+                                            enums::enums::FileType::Other => {
+                                                self.filter_others = true;
+                                                self.filters_filetype_counters[3] += 1;
+                                            }
+                                            enums::enums::FileType::Video => {
+                                                self.filter_videos = true;
+                                                self.filters_filetype_counters[4] += 1;
+                                            }
+                                            enums::enums::FileType::None => {}
+                                            enums::enums::FileType::All => {}
+                                        }
+                                    }
+                                } */
+                            }
+                        }
+                    });
             });
 
         self::Application::main_layout(self, ctx);

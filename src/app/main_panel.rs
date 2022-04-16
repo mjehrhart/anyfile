@@ -8,7 +8,6 @@ use egui::{Color32, ScrollArea};
 impl Application {
     pub fn main_layout(&mut self, ctx: &egui::Context) {
         //
-        //fn get_row_values(row: HashMap<String, std::vec::Vec<Meta>>) {
         fn get_table_fields(dt: DupeTable) -> (String, String, String, String) {
             let mut a_total = 0;
             for item in &dt.list {
@@ -58,15 +57,7 @@ impl Application {
                 title = title[0..100].to_string();
             }
 
-            //title = truncate(&title, 200).to_string();
-            // let diff = 120 - title.chars().count();
-            // if diff > 0 {
-            //     for _ in 0..=diff {
-            //         title.push(' ');
-            //     }
-            // }
-
-            //adjusted_byte
+            // adjusted_byte
             let diff = 10 - adjusted_byte.to_string().chars().count();
             let mut space: String = String::from("");
             for _ in 0..diff {
@@ -74,7 +65,7 @@ impl Application {
             }
             let adjusted_byte = [space, adjusted_byte.to_string()].join("");
 
-            //text_file_count
+            // text_file_count
             let diff = 12 - text_file_count.to_string().chars().count();
             let mut space: String = String::from("");
             for _ in 0..diff {
@@ -106,25 +97,47 @@ impl Application {
             stroke: egui::Stroke::new(0.0, Color32::from_rgb(244, 244, 244)),
         };
 
-        // let mut number_of_rows = self.dupe_table.len();
         let mut table_vec = vec![];
         let mut number_of_rows = 0;
-        for item in self.dupe_table.clone() {
-            if item.visible {
-                number_of_rows += 1;
 
-                table_vec.push(item);
+        if !self.staging.is_empty() {
+            for item in &mut self.staging[self.selected_staging_index] {
+                if item.visible {
+                    number_of_rows += 1;
+
+                    table_vec.push(item);
+                }
+            }
+
+            match self.sort_by_index {
+                0 => {
+                    table_vec.sort_by(|a, b| b.count.cmp(&a.count)); //file count
+                }
+                1 => {
+                    table_vec.sort_by(|a, b| a.name.cmp(&b.name)); //file name
+                }
+                2 => {
+                    table_vec.sort_by(|a, b| {
+                        let mut a_total = 0;
+                        for row in &a.list {
+                            a_total += row.file_size;
+                        }
+
+                        let mut b_total = 0;
+                        for row in &b.list {
+                            b_total += row.file_size;
+                        }
+
+                        b_total.cmp(&a_total)
+                    });
+                }
+                _ => {}
             }
         }
 
-        // if vec_table.len() < self.pager_size[self.pager_size_index] {
-        //         num_rows = vec_table.len();
-        //     } else {
-        //         num_rows = self.pager_size[self.pager_size_index];
-        //     }
-
+        // TODO switch to sort on staging, not dupe_table
         // Immediate Change when select DropDown
-        match self.sort_by_index {
+        /*  match self.sort_by_index {
             0 => {
                 self.dupe_table.sort_by(|a, b| b.count.cmp(&a.count)); //file count
             }
@@ -147,7 +160,7 @@ impl Application {
                 });
             }
             _ => {}
-        }
+        } */
 
         egui::CentralPanel::default()
             .frame(frame_sytle_1)
@@ -160,17 +173,16 @@ impl Application {
                     .stick_to_right()
                     .show_rows(ui, row_height, number_of_rows, |ui, row_range| {
                         for row in row_range {
+                            //
                             let (title, adjusted_byte, file_count, icon) =
                                 get_table_fields(table_vec[row].clone());
-                            // let (title, adjusted_byte, file_count) = get_table_fields(self.dupe_table[row].clone());
 
                             egui::Grid::new("grid_main_labels")
                                 .striped(true)
-                                .num_columns(2) 
+                                .num_columns(2)
                                 .striped(true)
                                 .spacing(egui::Vec2::new(10.0, 0.0))
                                 .show(ui, |ui| {
-                               
                                     ui.add_sized(
                                         [25., 35.0],
                                         egui::Button::new(
@@ -179,7 +191,7 @@ impl Application {
                                                 .monospace(),
                                         )
                                         .fill(egui::Color32::from_rgb(49, 90, 125)),
-                                    ); 
+                                    );
                                     ui.add_sized(
                                         [60.0, 35.0],
                                         egui::Button::new(
@@ -191,7 +203,7 @@ impl Application {
                                     );
                                     ui.add_sized(
                                         [60.0, 35.0],
-                                        egui::Button::new( 
+                                        egui::Button::new(
                                             egui::RichText::new(file_count)
                                                 .color(egui::Color32::from_rgb(255, 255, 255))
                                                 .monospace(),
@@ -199,19 +211,20 @@ impl Application {
                                         .fill(egui::Color32::from_rgb(49, 90, 125)),
                                     );
 
-                                     if ui.add_sized(
-                                         [500.0, 35.0],
-                                        egui::Button::new(
-                                            egui::RichText::new(title)
-                                                .color(egui::Color32::from_rgb(255, 255, 255))
-                                                .monospace(),
+                                    if ui
+                                        .add_sized(
+                                            [500.0, 35.0],
+                                            egui::Button::new(
+                                                egui::RichText::new(title)
+                                                    .color(egui::Color32::from_rgb(255, 255, 255))
+                                                    .monospace(),
+                                            )
+                                            .fill(egui::Color32::from_rgb(49, 90, 125)),
                                         )
-                                        .fill(egui::Color32::from_rgb(49, 90, 125)),
-                                    )
-                                    .clicked(){};
- 
+                                        .clicked()
+                                    {};
+
                                     ui.end_row();
-                                    
                                 });
                         } // end for row in row_range
                     }); //end of scroll

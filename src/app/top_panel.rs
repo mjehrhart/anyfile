@@ -11,7 +11,7 @@ use super::controller::Application;
 impl Application {
     pub fn top_layout(&mut self, ctx: &egui::Context) {
         //
-        let my_frame2 = egui::containers::Frame {
+        let frame_style_1 = egui::containers::Frame {
             margin: egui::style::Margin {
                 left: 10.,
                 right: 2.,
@@ -33,9 +33,9 @@ impl Application {
         };
 
         egui::TopBottomPanel::top("top_panel")
-            .frame(my_frame2)
+            .frame(frame_style_1)
             .show(ctx, |ui| {
-                //ui.group(|ui| { 
+                //ui.group(|ui| {
                 ui.with_layout(egui::Layout::left_to_right(), |ui| {
                     //DIRECTORY IMAGE
                     let image_size = self.image_filter.size_vec2();
@@ -86,6 +86,7 @@ impl Application {
                         )
                         .frame(true);
 
+                        // RUNNING
                         if ui.add(image_button).clicked() {
                             // EVENT CLICKED ----- EVENT CLICKED ----- EVENT CLICKED
                             let start = std::time::Instant::now();
@@ -154,6 +155,46 @@ impl Application {
                                 self.dupe_table.push(dt);
                             }
 
+                            //// ********************************** ////
+                            // TODO stopped here - working on staging
+                            //
+                            // Clear staging before loading it
+                            self.staging.clear();
+                            let pager_size = self.pager_size[self.pager_size_index];
+
+                            if self.dupe_table.len() > pager_size {
+                                let quot = self.dupe_table.len() / pager_size;
+                                let rem = self.dupe_table.len() % pager_size;
+                                // println!("quot {}", quot);
+                                // println!("rem {}", rem);
+                                for i in 0..quot {
+                                    let y = (i + 1) * pager_size;
+                                    let x = y - pager_size;
+
+                                    //println!("[x..y]: [{}..{}]", x, y);
+                                    let v = self.dupe_table[x..y].to_vec();
+                                    self.staging.push(v.clone());
+                                }
+                                //rem
+                                {
+                                    let y = quot * pager_size;
+                                    let x = y - rem;
+
+                                    //println!("![x..y]: [{}..{}]", x, y);
+                                    let v = self.dupe_table[y..].to_vec();
+                                    self.staging.push(v);
+                                }
+                            } else {
+                                //
+                                self.staging.push(self.dupe_table[..].to_vec());
+                            }
+
+                            self.selected_staging_index = 0;
+
+                            println!("staging => {:#?}", self.staging[0].len());
+
+                            //// ********************************** ////
+
                             // let mut table_vec = vec![];
                             // let mut number_of_rows = 0;
                             // for item in self.dupe_table.clone(){
@@ -163,6 +204,7 @@ impl Application {
                             //         table_vec.push(item);
                             //     }
                             // }
+                            //// ********************************** ////
 
                             // Set Search Duration
                             let duration = start.elapsed();
@@ -186,7 +228,7 @@ impl Application {
             });
 
         egui::TopBottomPanel::top("top_panel2")
-            .frame(my_frame2)
+            .frame(frame_style_1)
             .show(ctx, |ui| {
                 //
                 ui.add_visible_ui(self.show_filter_bar, |ui| {
