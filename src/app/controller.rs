@@ -32,6 +32,7 @@ pub struct Application {
     //
     pub time_elapsed: std::time::Duration,
     pub show_filter_bar: bool,
+    pub show_delete_button: bool,
     //
     pub filter_search_filetype: [bool; 5],
     pub filters_filetype_counters: [i32; 6],
@@ -85,8 +86,9 @@ impl Application {
             //
             time_elapsed: std::time::Duration::new(0, 0),
             show_filter_bar: true,
+            show_delete_button: false,
             //
-            filter_search_filetype: [true, true, false, false, false],
+            filter_search_filetype: [false, true, false, false, false],
             filters_filetype_counters: [0; 6],
             //
             filter_all: true,
@@ -115,7 +117,7 @@ impl Application {
             //
             image_checkbox_audios: RetainedImage::from_image_bytes(
                 "Checkbox1",
-                include_bytes!("../../resources/checked.png"),
+                include_bytes!("../../resources/unchecked.png"),
             )
             .unwrap(),
             image_checkbox_documents: RetainedImage::from_image_bytes(
@@ -224,62 +226,99 @@ impl epi::App for Application {
             .frame(frame_style_1)
             .show(ctx, |ui| {
                 // BUTTON DELETE ROW
-                if ui
-                    .add(egui::Button::new(
-                        egui::RichText::new("Delete Below").color(egui::Color32::LIGHT_RED), //.monospace(),
-                    ))
-                    .clicked()
-                {
-                    // EVENT DELETE ITEMS
-                    let collection = self
-                        .finder
-                        .data_set
-                        .get_mut(&self.staging_checksum)
-                        .unwrap();
 
-                    for mut collection in self.staging[self.selected_staging_index].iter_mut() {
-                        if collection.checksum == self.staging_checksum {
-                            //println!("..collection => {:#?}", collection);
-                            collection.list.retain(|x| {
-                                (x.status == FileAction::None)
-                                    || (x.status == FileAction::Read)
-                                    || (x.status == FileAction::Save)
-                            });
+                ui.add_visible_ui(self.show_delete_button, |ui| {
+                    if ui
+                        .add(egui::Button::new(
+                            egui::RichText::new("Delete Below").color(egui::Color32::LIGHT_RED), //.monospace(),
+                        ))
+                        .clicked()
+                    {
+                        // EVENT DELETE ITEMS
+                        // Remove file from os first and then remove from vec[]
+                        let collection = self
+                            .finder
+                            .data_set
+                            .get_mut(&self.staging_checksum)
+                            .unwrap();
 
-                            println!("...collection => {:#?}", collection);
+                        // Loop through in reverse to maintain order when deleting
+                        for i in (0..collection.len()).rev() {
+                            if collection[i].status == FileAction::Delete
+                                && collection[i].checksum == self.staging_checksum
+                            {
+                                std::fs::remove_file(&collection[i].path).ok();
+
+                                // Deincrement file count on left side panel
+                                match collection[i].file_type {
+                                    enums::FileType::Image => {
+                                        self.filters_filetype_counters[2] -= 1;
+                                    }
+                                    enums::FileType::Audio => {
+                                        self.filters_filetype_counters[0] -= 1;
+                                    }
+                                    enums::FileType::Video => {
+                                        self.filters_filetype_counters[4] -= 1;
+                                    }
+                                    enums::FileType::Document => {
+                                        self.filters_filetype_counters[1] -= 1;
+                                    }
+                                    enums::FileType::Other => {
+                                        self.filters_filetype_counters[3] -= 1;
+                                    }
+                                    enums::FileType::None => {}
+                                    enums::FileType::All => {}
+                                }
+
+                                // Remove element from collection gui
+                                collection.remove(i);
+                            }
                         }
 
+                        ///////////////////////////////////////////////////
+                        self.dupe_table.clear();
+                        for item in self.finder.data_set.iter() {
+                            let (k, v) = item;
+
+                            let dt = DupeTable {
+                                name: v[0].name.to_string(),
+                                count: v.len().try_into().unwrap(),
+                                checksum: k.to_string(),
+                                list: v.to_vec(),
+                                file_type: v[0].file_type,
+                                visible: true,
+                            };
+                            self.dupe_table.push(dt);
+                        }
+
+                        // Clear staging before loading it
+                        self.staging.clear();
+                        let pager_size = self.pager_size[self.pager_size_index];
+
+                        if self.dupe_table.len() > pager_size {
+                            let quot = self.dupe_table.len() / pager_size;
+                            let rem = self.dupe_table.len() % pager_size;
+
+                            for i in 0..quot {
+                                let y = (i + 1) * pager_size;
+                                let x = y - pager_size;
+
+                                let v = self.dupe_table[x..y].to_vec();
+                                self.staging.push(v.clone());
+                            }
+                            //rem
+                            {
+                                let y = quot * pager_size;
+                                let x = y - rem;
+
+                                let v = self.dupe_table[y..].to_vec();
+                                self.staging.push(v);
+                            }
+                        } else {
+                            self.staging.push(self.dupe_table[..].to_vec());
+                        }
                     }
- 
-                    //Remove file from os first
-                    // let mut deleted_count = 0;
-                    // for row in &self.sub_staging {
-                    //     if row.status == FileAction::Delete {
-                    //         std::fs::remove_file(&row.path).ok();
-                    //         deleted_count += 1;
-                    //     }
-                    // }
-
-                    //Remove file element from hashmap for gui first
-                    self.sub_staging.retain(|x| {
-                        (x.status == FileAction::None)
-                            || (x.status == FileAction::Read)
-                            || (x.status == FileAction::Save)
-                    });
- 
-                    //Remove file element from hashmap for gui second
-                    let collection = self
-                        .finder
-                        .data_set
-                        .get_mut(&self.staging_checksum)
-                        .unwrap();
-
-                    collection.retain(|x| {
-                        (x.status == FileAction::None)
-                            || (x.status == FileAction::Read)
-                            || (x.status == FileAction::Save)
-                    });
-                }
+                });
 
                 // DELETION/SUB TABLE
                 ui.add_space(5.0);
@@ -316,6 +355,7 @@ impl epi::App for Application {
                                 for _ in 0..diff {
                                     space.push(' ');
                                 }
+
                                 title = [title.to_string(), space].join(" ");
 
                                 ///////////////////////////////////////////////////////////////
@@ -334,16 +374,16 @@ impl epi::App for Application {
                                                 row.status = FileAction::Read;
                                             }
 
-                                            //println!("collection => {:#?}", collection);
-                                            /* let collection = self
+                                            // Below is needed for Deleting files from OS and GUI
+                                            // Step 1
+                                            let collection = self
                                                 .finder
                                                 .data_set
                                                 .get_mut(&self.staging_checksum)
                                                 .unwrap();
-
+                                            // Step 2
                                             for mut row2 in collection {
                                                 if row2.path == row.path {
-                                                    //println!("row2 => {:#?}", row2);
                                                     if row.ui_event_status {
                                                         row2.status = FileAction::Delete;
                                                         row2.ui_event_status = true;
@@ -352,7 +392,7 @@ impl epi::App for Application {
                                                         row2.ui_event_status = false;
                                                     }
                                                 }
-                                            } */
+                                            }
                                         };
                                         ui.add_sized(
                                             [400.0, 15.0],
