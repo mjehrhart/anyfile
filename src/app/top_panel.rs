@@ -259,8 +259,41 @@ impl Application {
                                     self.pager_size.len(),
                                     |i| self.pager_size[i].to_owned().to_string(),
                                 )
-                                .clicked()
-                            {};
+                                .changed()
+                            {
+                                // Change pager size when dropdown value changes
+                                // Clear staging before loading it
+                                self.staging.clear();
+                                let pager_size = self.pager_size[self.pager_size_index];
+
+                                if self.dupe_table.len() > pager_size {
+                                    let quot = self.dupe_table.len() / pager_size;
+                                    let rem = self.dupe_table.len() % pager_size;
+                                
+                                    for i in 0..quot {
+                                        let y = (i + 1) * pager_size;
+                                        let x = y - pager_size;
+ 
+                                        let v = self.dupe_table[x..y].to_vec();
+                                        self.staging.push(v.clone());
+                                    }
+                                    //rem
+                                    {
+                                        let y = quot * pager_size;
+                                        let x = y - rem; 
+                                        let v = self.dupe_table[y..].to_vec();
+                                        self.staging.push(v);
+                                    }
+                                } else {
+                                    //
+                                    self.staging.push(self.dupe_table[..].to_vec());
+                                }
+
+                                // Reset to Pager Box index 0
+                                self.selected_staging_index = 0; 
+
+                                //// ********************************** ////
+                            };
 
                             // FZZY FILTER
                             self::Application::add_label(self, ui, "Filter".to_string());
@@ -276,7 +309,9 @@ impl Application {
 
                             if response.lost_focus() && ui.input().key_pressed(egui::Key::Enter) {
                                 let matcher = SkimMatcherV2::default();
-                                for mut collection in &mut self.dupe_table[..] {
+
+                                //for mut collection in &mut self.dupe_table[..] {
+                                for mut collection in &mut self.staging[self.selected_staging_index] {
                                     let res =
                                         matcher.fuzzy_match(&collection.name, &self.fuzzy_search);
 

@@ -1,3 +1,4 @@
+use byte_unit::Byte;
 use eframe::{
     egui,
     epi::{self, Storage},
@@ -5,7 +6,11 @@ use eframe::{
 use egui::{Color32, ScrollArea, Sense};
 use egui_extras::RetainedImage;
 
-use crate::{enums::enums, file::meta::Meta, finder::finder};
+use crate::{
+    enums::enums::{self, FileAction},
+    file::{self, meta::Meta},
+    finder::finder,
+};
 
 #[derive(Clone, Debug)]
 pub struct DupeTable {
@@ -19,6 +24,7 @@ pub struct DupeTable {
 
 pub struct Application {
     pub staging: Vec<Vec<DupeTable>>,
+    pub sub_staging: Vec<file::meta::Meta>,
     pub dupe_table: Vec<DupeTable>,
     pub finder: finder::Finder,
     pub directory: String,
@@ -69,6 +75,7 @@ pub struct Application {
 impl Application {
     pub fn default() -> Self {
         Self {
+            sub_staging: vec![file::meta::Meta::new()],
             staging: vec![],               //used in paging
             dupe_table: vec![],            //ui uses this for show and tell
             finder: finder::Finder::new(), //runs the search
@@ -100,10 +107,10 @@ impl Application {
                 "Size".to_string(),
             ],
             pager_size: [
-                3, 5, 10, 100, 1_000, 10_000, 25_000, 35_000, 50_000, 100_000,
+                100, 1_000, 10_000, 25_000, 35_000, 50_000, 100_000,
             ]
             .to_vec(),
-            pager_size_index: 3,
+            pager_size_index: 4,
             selected_staging_index: 0,
             fuzzy_search: String::from(""),
             //
@@ -198,6 +205,27 @@ impl epi::App for Application {
             stroke: egui::Stroke::new(0.0, Color32::from_rgb(244, 244, 244)),
         };
 
+        let frame_style_2 = egui::containers::Frame {
+            margin: egui::style::Margin {
+                left: 10.,
+                right: 2.,
+                top: 5.,
+                bottom: 2.,
+            },
+            rounding: egui::Rounding {
+                nw: 1.0,
+                ne: 1.0,
+                sw: 1.0,
+                se: 1.0,
+            },
+            shadow: eframe::epaint::Shadow {
+                extrusion: 0.0,
+                color: Color32::TRANSPARENT,
+            },
+            fill: Color32::from_rgb(200, 200, 200),
+            stroke: egui::Stroke::new(0.0, Color32::from_rgb(244, 244, 244)),
+        };
+
         egui::SidePanel::left("left_panel")
             .frame(frame_style_1)
             .min_width(113.)
@@ -208,98 +236,183 @@ impl epi::App for Application {
 
         self::Application::top_layout(self, ctx);
 
-        egui::TopBottomPanel::bottom("bottom_panel")
+        // Main Table + Pager
+        self::Application::main_layout(self, ctx);
+
+        // Deletion Panel
+        egui::TopBottomPanel::bottom("bottom_sub_panel")
             .frame(frame_style_1)
             .show(ctx, |ui| {
-                let _main_dir = egui::Direction::LeftToRight;
-                let _layout = egui::Layout::left_to_right()
-                    .with_main_wrap(true)
-                    .with_cross_align(egui::Align::Center);
+                ui.add_space(10.0);
+                ui.with_layout(
+                    egui::Layout::from_main_dir_and_cross_align(
+                        egui::Direction::LeftToRight,
+                        egui::Align::LEFT,
+                    ),
+                    |ui| {
+                        ScrollArea::vertical()
+                            .id_source("bottom_scroll2")
+                            .auto_shrink([false, false])
+                            .max_height(150.)
+                            .min_scrolled_height(150.)
+                            .stick_to_right()
+                            .show(ui, |ui| {
+                                //ui.label("egui::TopBottomPanel::bottom(\"bottom_sub_panel\")");
+                                //
 
-                egui::Grid::new("grid_main_labels")
-                    .spacing(egui::Vec2::new(0.0, 0.0))
-                    .show(ui, |ui| {
-                        //
-                        //TODO ui is showing extra button at the end
-                        for i in 0..self.staging.len() {
-                            if ui
-                                .add_sized([35.0, 35.0], egui::Button::new((i + 1).to_string()))
-                                .clicked()
-                            {
-                                self.selected_staging_index = i;
-                                println!(
-                                    "self.selected_staging_index:: {}",
-                                    self.selected_staging_index
-                                );
+                                ui.vertical(|ui| {
+                                    for row in &self.sub_staging {
+                                        //********************************************************//
 
-                                // Clear counters
-                                // self.filters_filetype_counters = [0; 6];
-                                self.filter_audios = false;
-                                self.filter_documents = false;
-                                self.filter_images = false;
-                                self.filter_others = false;
-                                self.filter_videos = false;
-                                for item in &mut self.staging[self.selected_staging_index] {
-                                    match item.file_type {
-                                        enums::FileType::Audio => {
-                                            self.filter_audios = true;
+                                        //Formatting text for gui
+                                        let date = get_created_date(&row.path);
+                                        match &date {
+                                            Ok(_) => {}
+                                            Err(e) => {
+                                                //println!("derror::ui::mod.rs::10001{} ", e);
+                                                break;
+                                            }
                                         }
-                                        enums::FileType::Document => {
-                                            self.filter_documents = true;
+
+                                        let byte =
+                                            Byte::from_bytes(row.file_size.try_into().unwrap());
+                                        let adjusted_byte = byte.get_appropriate_unit(false);
+
+                                        let mut title: String;
+                                        title = format!("▶ {} ", row.path); //▶  ▶
+                                        title = truncate(&title, 94).to_string();
+
+                                        //'attemp to subtract with overflow'
+                                        let diff = 95 - title.chars().count();
+                                        let mut space = " ".to_string();
+                                        for _ in 0..diff {
+                                            space.push(' ');
                                         }
-                                        enums::FileType::Image => {
-                                            self.filter_images = true;
-                                        }
-                                        enums::FileType::Other => {
-                                            self.filter_others = true;
-                                        }
-                                        enums::FileType::Video => {
-                                            self.filter_videos = true;
-                                        }
-                                        enums::FileType::None => {}
-                                        enums::FileType::All => {}
+
+                                        title = [
+                                            title.to_string(),
+                                            space,
+                                            //" ".to_string(),
+                                            //date.unwrap(),
+                                            //adjusted_byte.to_string(),
+                                        ]
+                                        .join(" ");
+                                     
+                                        ///////////////////////////////////////////////////////////////
+
+                                        egui::Grid::new("grid_main_labels")
+                                            .striped(true)
+                                            .num_columns(5)
+                                            .min_row_height(20.0)
+                                            .spacing(egui::Vec2::new(0.0, 0.0))
+                                            .show(ui, |ui| {
+                                                if ui.checkbox(&mut true, " ").clicked() {
+                                                    // if row.ui_event_status {
+                                                    //     row.status = FileAction::Delete;
+                                                    // } else {
+                                                    //     row.status = FileAction::Read;
+                                                    // }
+
+                                                    // let collection = self
+                                                    //     .b
+                                                    //     .data_set
+                                                    //     .get_mut(&self.selected_collection)
+                                                    //     .unwrap();
+                                                    // for mut row2 in collection {
+                                                    //     if row2.path == row.path {
+                                                    //         if row.ui_event_status {
+                                                    //             //row2.set_status(FileAction::Delete);
+                                                    //             row2.status = FileAction::Delete;
+                                                    //             row2.ui_event_status = true;
+                                                    //         } else {
+                                                    //             //row2.set_status(FileAction::Read);
+                                                    //             row2.status = FileAction::Read;
+                                                    //             row2.ui_event_status = false;
+                                                    //         }
+                                                    //     }
+                                                    // }
+
+                                                    /* let modifiers = ui.ctx().input().modifiers;
+                                                    ui.ctx().output().open_url = Some(egui::output::OpenUrl {
+                                                        url: row.path.to_owned(),
+                                                        new_tab: modifiers.any(),
+                                                    }); */
+                                                };
+                                                ui.add_sized(
+                                                    [400.0, 15.0],
+                                                    egui::Label::new(
+                                                        egui::RichText::new(title)
+                                                            .color(egui::Color32::from_rgb(
+                                                                200, 200, 200,
+                                                            ))
+                                                            .monospace(),
+                                                    ),
+                                                );
+                                                ui.add_sized(
+                                                    [100.0, 15.0],
+                                                    egui::Label::new(
+                                                        egui::RichText::new(date.unwrap())
+                                                            .color(egui::Color32::from_rgb(
+                                                                200, 200, 200,
+                                                            ))
+                                                            .monospace(),
+                                                    ),
+                                                );
+                                                ui.add_sized(
+                                                    [100.0, 15.0],
+                                                    egui::Label::new(
+                                                        egui::RichText::new(
+                                                            adjusted_byte.to_string(),
+                                                        )
+                                                        .color(egui::Color32::from_rgb(
+                                                            200, 200, 200,
+                                                        ))
+                                                        .monospace(),
+                                                    ),
+                                                ); 
+                                                ui.add_sized(
+                                                    [100.0, 15.0],
+                                                    egui::Hyperlink::from_label_and_url("VIEW", &row.path)
+                                                );
+                                                ui.end_row();
+                                            });
+                                        //ui.hyperlink_to(title, &row.path).on_hover_ui(|_ui| {});
                                     }
-                                }
-
-                                /* for collection in d2.data_set.iter() {
-                                    let (_, v) = collection;
-
-                                    for row in v {
-                                        match row.file_type {
-                                            enums::enums::FileType::Audio => {
-                                                self.filter_audios = true;
-                                                self.filters_filetype_counters[0] += 1;
-                                            }
-                                            enums::enums::FileType::Document => {
-                                                self.filter_documents = true;
-                                                self.filters_filetype_counters[1] += 1;
-                                            }
-                                            enums::enums::FileType::Image => {
-                                                self.filter_images = true;
-                                                self.filters_filetype_counters[2] += 1;
-                                            }
-                                            enums::enums::FileType::Other => {
-                                                self.filter_others = true;
-                                                self.filters_filetype_counters[3] += 1;
-                                            }
-                                            enums::enums::FileType::Video => {
-                                                self.filter_videos = true;
-                                                self.filters_filetype_counters[4] += 1;
-                                            }
-                                            enums::enums::FileType::None => {}
-                                            enums::enums::FileType::All => {}
-                                        }
-                                    }
-                                } */
-                            }
-                        }
-                    });
+                                });
+                            }); //end of scroll
+                    },
+                );
             });
-
-        self::Application::main_layout(self, ctx);
     }
 
     fn on_exit(&mut self) {
         println!("exiting...")
+    }
+}
+
+pub fn get_created_date(path: &str) -> std::io::Result<String> {
+    let _metadata = match std::fs::metadata(path) {
+        Ok(f) => {
+            if let Ok(time) = f.created() {
+                let datetime: chrono::DateTime<chrono::Local> = time.into();
+                let t: String = datetime.format("%m/%d/%Y").to_string();
+                return Ok(t);
+            } else {
+                return Err(std::io::Error::new(std::io::ErrorKind::Other, "foo"));
+            }
+        }
+        Err(_e) => {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                "File not Found: 100221",
+            ))
+        }
+    };
+}
+
+fn truncate(s: &str, max_chars: usize) -> &str {
+    match s.char_indices().nth(max_chars) {
+        None => s,
+        Some((idx, _)) => &s[..idx],
     }
 }

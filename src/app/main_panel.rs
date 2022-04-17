@@ -6,6 +6,57 @@ use byte_unit::Byte;
 use egui::{Color32, ScrollArea};
 
 impl Application {
+    //
+    pub fn pager(&mut self, ui: &mut egui::Ui, ctx: &egui::Context) {
+        //ui.add_space(20.0);
+        egui::Grid::new("grid_main_labels2")
+            .spacing(egui::Vec2::new(0.0, 0.0))
+            .show(ui, |ui| {
+                //
+                // TODO ui is showing extra button at the end
+                for i in 0..self.staging.len() {
+                    if ui
+                        .add_sized([35.0, 35.0], egui::Button::new((i + 1).to_string()))
+                        .clicked()
+                    {
+                        self.selected_staging_index = i;
+
+                        println!(
+                            "CLICKED: self.selected_staging_index > {}",
+                            self.selected_staging_index
+                        );
+                        // Clear counters
+                        self.filter_audios = false;
+                        self.filter_documents = false;
+                        self.filter_images = false;
+                        self.filter_others = false;
+                        self.filter_videos = false;
+                        for item in &mut self.staging[self.selected_staging_index] {
+                            match item.file_type {
+                                enums::enums::FileType::Audio => {
+                                    self.filter_audios = true;
+                                }
+                                enums::enums::FileType::Document => {
+                                    self.filter_documents = true;
+                                }
+                                enums::enums::FileType::Image => {
+                                    self.filter_images = true;
+                                }
+                                enums::enums::FileType::Other => {
+                                    self.filter_others = true;
+                                }
+                                enums::enums::FileType::Video => {
+                                    self.filter_videos = true;
+                                }
+                                enums::enums::FileType::None => {}
+                                enums::enums::FileType::All => {}
+                            }
+                        }
+                    }
+                }
+            });
+    }
+
     pub fn main_layout(&mut self, ctx: &egui::Context) {
         //
         fn get_table_fields(dt: DupeTable) -> (String, String, String, String) {
@@ -56,6 +107,12 @@ impl Application {
             } else {
                 title = title[0..100].to_string();
             }
+            let diff = 100 - title.to_string().chars().count();
+            let mut space: String = String::from("");
+            for _ in 0..diff {
+                space.push(' ');
+            }
+            title = ["  ".to_string(), title.to_string(), space].join(" ");
 
             // adjusted_byte
             let diff = 10 - adjusted_byte.to_string().chars().count();
@@ -97,10 +154,32 @@ impl Application {
             stroke: egui::Stroke::new(0.0, Color32::from_rgb(244, 244, 244)),
         };
 
+        let frame_sytle_2 = egui::containers::Frame {
+            margin: egui::style::Margin {
+                left: 10.,
+                right: 2.,
+                top: 5.,
+                bottom: 2.,
+            },
+            rounding: egui::Rounding {
+                nw: 1.0,
+                ne: 1.0,
+                sw: 1.0,
+                se: 1.0,
+            },
+            shadow: eframe::epaint::Shadow {
+                extrusion: 0.0,
+                color: Color32::TRANSPARENT,
+            },
+            fill: Color32::from_rgb(200, 200, 200),
+            stroke: egui::Stroke::new(0.0, Color32::from_rgb(49, 90, 125)),
+        };
+
         let mut table_vec = vec![];
         let mut number_of_rows = 0;
 
         if !self.staging.is_empty() {
+            // println!("self.selected_staging_index > {}", self.selected_staging_index);
             for item in &mut self.staging[self.selected_staging_index] {
                 if item.visible {
                     number_of_rows += 1;
@@ -135,33 +214,6 @@ impl Application {
             }
         }
 
-        // TODO switch to sort on staging, not dupe_table
-        // Immediate Change when select DropDown
-        /*  match self.sort_by_index {
-            0 => {
-                self.dupe_table.sort_by(|a, b| b.count.cmp(&a.count)); //file count
-            }
-            1 => {
-                self.dupe_table.sort_by(|a, b| a.name.cmp(&b.name)); //file name
-            }
-            2 => {
-                self.dupe_table.sort_by(|a, b| {
-                    let mut a_total = 0;
-                    for row in &a.list {
-                        a_total += row.file_size;
-                    }
-
-                    let mut b_total = 0;
-                    for row in &b.list {
-                        b_total += row.file_size;
-                    }
-
-                    b_total.cmp(&a_total)
-                });
-            }
-            _ => {}
-        } */
-
         egui::CentralPanel::default()
             .frame(frame_sytle_1)
             .show(ctx, |ui| {
@@ -169,7 +221,8 @@ impl Application {
                 ScrollArea::vertical()
                     .id_source("main_scroll")
                     .auto_shrink([false, false])
-                    //.max_height(500.)
+                    .max_height(490.)
+                    .min_scrolled_height(490.)
                     .stick_to_right()
                     .show_rows(ui, row_height, number_of_rows, |ui, row_range| {
                         for row in row_range {
@@ -222,12 +275,27 @@ impl Application {
                                             .fill(egui::Color32::from_rgb(49, 90, 125)),
                                         )
                                         .clicked()
-                                    {};
+                                    {
+                                        self.sub_staging = table_vec[row].list.clone();
+                                        println!("table_vec[row] => {:#?}", table_vec[row]);
+                                        // self.selected_collection = vec_table[row].checksum.to_string();
+                                        // self.c = vec_table[row].list.to_vec();
+                                    };
 
                                     ui.end_row();
                                 });
                         } // end for row in row_range
                     }); //end of scroll
+
+                let sep = egui::Separator::default().spacing(5.);
+                ui.add(sep); 
+            });
+
+        egui::TopBottomPanel::bottom("bottom_sub_panel22")
+            .frame(frame_sytle_1)
+            .show(ctx, |ui| {
+                //ui.add_space(20.0);
+                self::Application::pager(self, ui, ctx);
             });
     }
 }
