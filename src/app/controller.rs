@@ -106,10 +106,7 @@ impl Application {
                 "Name".to_string(),
                 "Size".to_string(),
             ],
-            pager_size: [
-                100, 1_000, 10_000, 25_000, 35_000, 50_000, 100_000,
-            ]
-            .to_vec(),
+            pager_size: [100, 1_000, 10_000, 25_000, 35_000, 50_000, 100_000].to_vec(),
             pager_size_index: 4,
             selected_staging_index: 0,
             fuzzy_search: String::from(""),
@@ -243,145 +240,137 @@ impl epi::App for Application {
         egui::TopBottomPanel::bottom("bottom_sub_panel")
             .frame(frame_style_1)
             .show(ctx, |ui| {
-                ui.add_space(10.0);
-                ui.with_layout(
-                    egui::Layout::from_main_dir_and_cross_align(
-                        egui::Direction::LeftToRight,
-                        egui::Align::LEFT,
-                    ),
-                    |ui| {
-                        ScrollArea::vertical()
-                            .id_source("bottom_scroll2")
-                            .auto_shrink([false, false])
-                            .max_height(150.)
-                            .min_scrolled_height(150.)
-                            .stick_to_right()
-                            .show(ui, |ui| {
-                                //ui.label("egui::TopBottomPanel::bottom(\"bottom_sub_panel\")");
-                                //
+                //ui.add_space(10.0);
+                // ui.with_layout(
+                //     egui::Layout::from_main_dir_and_cross_align(
+                //         egui::Direction::LeftToRight,
+                //         egui::Align::LEFT,
+                //     ),
+                //    |ui| { });
+                // BUTTON DELETE ROW
+                if ui
+                    .add(egui::Button::new(
+                        egui::RichText::new("Delete Below")
+                            .color(egui::Color32::LIGHT_RED)
+                            //.monospace(),
+                    ))
+                    .clicked()
+                {}
+                ScrollArea::vertical()
+                    .id_source("bottom_scroll2")
+                    .auto_shrink([false, false])
+                    .max_height(130.)
+                    .min_scrolled_height(130.)
+                    .stick_to_right()
+                    .show(ui, |ui| { 
+                        // 
+                        ui.vertical(|ui| {
+                            for row in &self.sub_staging {
+                                //********************************************************//
 
-                                ui.vertical(|ui| {
-                                    for row in &self.sub_staging {
-                                        //********************************************************//
-
-                                        //Formatting text for gui
-                                        let date = get_created_date(&row.path);
-                                        match &date {
-                                            Ok(_) => {}
-                                            Err(e) => {
-                                                //println!("derror::ui::mod.rs::10001{} ", e);
-                                                break;
-                                            }
-                                        }
-
-                                        let byte =
-                                            Byte::from_bytes(row.file_size.try_into().unwrap());
-                                        let adjusted_byte = byte.get_appropriate_unit(false);
-
-                                        let mut title: String;
-                                        title = format!("▶ {} ", row.path); //▶  ▶
-                                        title = truncate(&title, 94).to_string();
-
-                                        //'attemp to subtract with overflow'
-                                        let diff = 95 - title.chars().count();
-                                        let mut space = " ".to_string();
-                                        for _ in 0..diff {
-                                            space.push(' ');
-                                        }
-
-                                        title = [
-                                            title.to_string(),
-                                            space,
-                                            //" ".to_string(),
-                                            //date.unwrap(),
-                                            //adjusted_byte.to_string(),
-                                        ]
-                                        .join(" ");
-                                     
-                                        ///////////////////////////////////////////////////////////////
-
-                                        egui::Grid::new("grid_main_labels")
-                                            .striped(true)
-                                            .num_columns(5)
-                                            .min_row_height(20.0)
-                                            .spacing(egui::Vec2::new(0.0, 0.0))
-                                            .show(ui, |ui| {
-                                                if ui.checkbox(&mut true, " ").clicked() {
-                                                    // if row.ui_event_status {
-                                                    //     row.status = FileAction::Delete;
-                                                    // } else {
-                                                    //     row.status = FileAction::Read;
-                                                    // }
-
-                                                    // let collection = self
-                                                    //     .b
-                                                    //     .data_set
-                                                    //     .get_mut(&self.selected_collection)
-                                                    //     .unwrap();
-                                                    // for mut row2 in collection {
-                                                    //     if row2.path == row.path {
-                                                    //         if row.ui_event_status {
-                                                    //             //row2.set_status(FileAction::Delete);
-                                                    //             row2.status = FileAction::Delete;
-                                                    //             row2.ui_event_status = true;
-                                                    //         } else {
-                                                    //             //row2.set_status(FileAction::Read);
-                                                    //             row2.status = FileAction::Read;
-                                                    //             row2.ui_event_status = false;
-                                                    //         }
-                                                    //     }
-                                                    // }
-
-                                                    /* let modifiers = ui.ctx().input().modifiers;
-                                                    ui.ctx().output().open_url = Some(egui::output::OpenUrl {
-                                                        url: row.path.to_owned(),
-                                                        new_tab: modifiers.any(),
-                                                    }); */
-                                                };
-                                                ui.add_sized(
-                                                    [400.0, 15.0],
-                                                    egui::Label::new(
-                                                        egui::RichText::new(title)
-                                                            .color(egui::Color32::from_rgb(
-                                                                200, 200, 200,
-                                                            ))
-                                                            .monospace(),
-                                                    ),
-                                                );
-                                                ui.add_sized(
-                                                    [100.0, 15.0],
-                                                    egui::Label::new(
-                                                        egui::RichText::new(date.unwrap())
-                                                            .color(egui::Color32::from_rgb(
-                                                                200, 200, 200,
-                                                            ))
-                                                            .monospace(),
-                                                    ),
-                                                );
-                                                ui.add_sized(
-                                                    [100.0, 15.0],
-                                                    egui::Label::new(
-                                                        egui::RichText::new(
-                                                            adjusted_byte.to_string(),
-                                                        )
-                                                        .color(egui::Color32::from_rgb(
-                                                            200, 200, 200,
-                                                        ))
-                                                        .monospace(),
-                                                    ),
-                                                ); 
-                                                ui.add_sized(
-                                                    [100.0, 15.0],
-                                                    egui::Hyperlink::from_label_and_url("VIEW", &row.path)
-                                                );
-                                                ui.end_row();
-                                            });
-                                        //ui.hyperlink_to(title, &row.path).on_hover_ui(|_ui| {});
+                                //Formatting text for gui
+                                let date = get_created_date(&row.path);
+                                match &date {
+                                    Ok(_) => {}
+                                    Err(e) => {
+                                        //println!("derror::ui::mod.rs::10001{} ", e);
+                                        break;
                                     }
-                                });
-                            }); //end of scroll
-                    },
-                );
+                                }
+
+                                let byte = Byte::from_bytes(row.file_size.try_into().unwrap());
+                                let adjusted_byte = byte.get_appropriate_unit(false);
+
+                                let mut title: String;
+                                title = format!("▶ {} ", row.path); //▶  ▶
+                                title = truncate(&title, 94).to_string();
+
+                                //'attemp to subtract with overflow'
+                                let diff = 95 - title.chars().count();
+                                let mut space = " ".to_string();
+                                for _ in 0..diff {
+                                    space.push(' ');
+                                }
+
+                                title = [
+                                    title.to_string(),
+                                    space, 
+                                ]
+                                .join(" ");
+
+                                ///////////////////////////////////////////////////////////////
+
+                                egui::Grid::new("grid_main_labels")
+                                    .striped(true)
+                                    .num_columns(5)
+                                    .min_row_height(20.0)
+                                    .spacing(egui::Vec2::new(0.0, 0.0))
+                                    .show(ui, |ui| {
+                                        if ui.checkbox(&mut true, " ").clicked() {
+                                            // if row.ui_event_status {
+                                            //     row.status = FileAction::Delete;
+                                            // } else {
+                                            //     row.status = FileAction::Read;
+                                            // }
+
+                                            // let collection = self
+                                            //     .b
+                                            //     .data_set
+                                            //     .get_mut(&self.selected_collection)
+                                            //     .unwrap();
+                                            // for mut row2 in collection {
+                                            //     if row2.path == row.path {
+                                            //         if row.ui_event_status {
+                                            //             //row2.set_status(FileAction::Delete);
+                                            //             row2.status = FileAction::Delete;
+                                            //             row2.ui_event_status = true;
+                                            //         } else {
+                                            //             //row2.set_status(FileAction::Read);
+                                            //             row2.status = FileAction::Read;
+                                            //             row2.ui_event_status = false;
+                                            //         }
+                                            //     }
+                                            // }
+
+                                            /* let modifiers = ui.ctx().input().modifiers;
+                                            ui.ctx().output().open_url = Some(egui::output::OpenUrl {
+                                                url: row.path.to_owned(),
+                                                new_tab: modifiers.any(),
+                                            }); */
+                                        };
+                                        ui.add_sized(
+                                            [400.0, 15.0],
+                                            egui::Label::new(
+                                                egui::RichText::new(title)
+                                                    .color(egui::Color32::from_rgb(200, 200, 200))
+                                                    .monospace(),
+                                            ),
+                                        );
+                                        ui.add_sized(
+                                            [100.0, 15.0],
+                                            egui::Label::new(
+                                                egui::RichText::new(date.unwrap())
+                                                    .color(egui::Color32::from_rgb(200, 200, 200))
+                                                    .monospace(),
+                                            ),
+                                        );
+                                        ui.add_sized(
+                                            [100.0, 15.0],
+                                            egui::Label::new(
+                                                egui::RichText::new(adjusted_byte.to_string())
+                                                    .color(egui::Color32::from_rgb(200, 200, 200))
+                                                    .monospace(),
+                                            ),
+                                        );
+                                        ui.add_sized(
+                                            [100.0, 15.0],
+                                            egui::Hyperlink::from_label_and_url("VIEW", &row.path),
+                                        );
+                                        ui.end_row();
+                                    }); 
+                            }
+                        });
+                    }); //end of scroll
             });
     }
 

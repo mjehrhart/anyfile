@@ -16,7 +16,7 @@ impl Application {
                 // TODO ui is showing extra button at the end
                 for i in 0..self.staging.len() {
                     if ui
-                        .add_sized([35.0, 35.0], egui::Button::new((i + 1).to_string()))
+                        .add_sized([15.0, 15.0], egui::Button::new((i + 1).to_string()))
                         .clicked()
                     {
                         self.selected_staging_index = i;
@@ -221,8 +221,8 @@ impl Application {
                 ScrollArea::vertical()
                     .id_source("main_scroll")
                     .auto_shrink([false, false])
-                    .max_height(490.)
-                    .min_scrolled_height(490.)
+                    .max_height(500.)
+                    .min_scrolled_height(500.)
                     .stick_to_right()
                     .show_rows(ui, row_height, number_of_rows, |ui, row_range| {
                         for row in row_range {
@@ -287,7 +287,8 @@ impl Application {
                         } // end for row in row_range
                     }); //end of scroll
 
-                let sep = egui::Separator::default().spacing(5.);
+                let sep = egui::Separator::default();
+                ui.add_space(5.0);
                 ui.add(sep); 
             });
 
