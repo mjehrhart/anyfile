@@ -156,7 +156,7 @@ impl Application {
                             }
 
                             //// ********************************** ////
-                            // TODO stopped here - working on staging
+                          
                             //
                             // Clear staging before loading it
                             self.staging.clear();
@@ -189,23 +189,9 @@ impl Application {
                                 self.staging.push(self.dupe_table[..].to_vec());
                             }
 
+                            // Reset pager index to 0
                             self.selected_staging_index = 0;
-
-                            println!("staging => {:#?}", self.staging[0].len());
-
-                            //// ********************************** ////
-
-                            // let mut table_vec = vec![];
-                            // let mut number_of_rows = 0;
-                            // for item in self.dupe_table.clone(){
-                            //     if item.visible {
-                            //         number_of_rows += 1;
-
-                            //         table_vec.push(item);
-                            //     }
-                            // }
-                            //// ********************************** ////
-
+ 
                             // Set Search Duration
                             let duration = start.elapsed();
                             self.time_elapsed = duration;

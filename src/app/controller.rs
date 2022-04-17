@@ -23,6 +23,7 @@ pub struct DupeTable {
 }
 
 pub struct Application {
+    pub staging_checksum: String,
     pub staging: Vec<Vec<DupeTable>>,
     pub sub_staging: Vec<file::meta::Meta>,
     pub dupe_table: Vec<DupeTable>,
@@ -75,6 +76,7 @@ pub struct Application {
 impl Application {
     pub fn default() -> Self {
         Self {
+            staging_checksum: String::from(""),
             sub_staging: vec![file::meta::Meta::new()],
             staging: vec![],               //used in paging
             dupe_table: vec![],            //ui uses this for show and tell
@@ -202,27 +204,7 @@ impl epi::App for Application {
             stroke: egui::Stroke::new(0.0, Color32::from_rgb(244, 244, 244)),
         };
 
-        let frame_style_2 = egui::containers::Frame {
-            margin: egui::style::Margin {
-                left: 10.,
-                right: 2.,
-                top: 5.,
-                bottom: 2.,
-            },
-            rounding: egui::Rounding {
-                nw: 1.0,
-                ne: 1.0,
-                sw: 1.0,
-                se: 1.0,
-            },
-            shadow: eframe::epaint::Shadow {
-                extrusion: 0.0,
-                color: Color32::TRANSPARENT,
-            },
-            fill: Color32::from_rgb(200, 200, 200),
-            stroke: egui::Stroke::new(0.0, Color32::from_rgb(244, 244, 244)),
-        };
-
+        // LEFT PANEL
         egui::SidePanel::left("left_panel")
             .frame(frame_style_1)
             .min_width(113.)
@@ -231,49 +213,93 @@ impl epi::App for Application {
                 self::Application::left_menu(self, ui, ctx);
             });
 
+        // TOP PANEL
         self::Application::top_layout(self, ctx);
 
-        // Main Table + Pager
+        // MAIN
         self::Application::main_layout(self, ctx);
 
-        // Deletion Panel
+        // DELETION/SUB PANEL
         egui::TopBottomPanel::bottom("bottom_sub_panel")
             .frame(frame_style_1)
             .show(ctx, |ui| {
-                //ui.add_space(10.0);
-                // ui.with_layout(
-                //     egui::Layout::from_main_dir_and_cross_align(
-                //         egui::Direction::LeftToRight,
-                //         egui::Align::LEFT,
-                //     ),
-                //    |ui| { });
                 // BUTTON DELETE ROW
                 if ui
                     .add(egui::Button::new(
-                        egui::RichText::new("Delete Below")
-                            .color(egui::Color32::LIGHT_RED)
-                            //.monospace(),
+                        egui::RichText::new("Delete Below").color(egui::Color32::LIGHT_RED), //.monospace(),
                     ))
                     .clicked()
-                {}
+                {
+                    // EVENT DELETE ITEMS
+                    let collection = self
+                        .finder
+                        .data_set
+                        .get_mut(&self.staging_checksum)
+                        .unwrap();
+
+                    for mut collection in self.staging[self.selected_staging_index].iter_mut() {
+                        if collection.checksum == self.staging_checksum {
+                            //println!("..collection => {:#?}", collection);
+                            collection.list.retain(|x| {
+                                (x.status == FileAction::None)
+                                    || (x.status == FileAction::Read)
+                                    || (x.status == FileAction::Save)
+                            });
+
+                            println!("...collection => {:#?}", collection);
+                        }
+
+                    }
+ 
+                    //Remove file from os first
+                    // let mut deleted_count = 0;
+                    // for row in &self.sub_staging {
+                    //     if row.status == FileAction::Delete {
+                    //         std::fs::remove_file(&row.path).ok();
+                    //         deleted_count += 1;
+                    //     }
+                    // }
+
+                    //Remove file element from hashmap for gui first
+                    self.sub_staging.retain(|x| {
+                        (x.status == FileAction::None)
+                            || (x.status == FileAction::Read)
+                            || (x.status == FileAction::Save)
+                    });
+ 
+                    //Remove file element from hashmap for gui second
+                    let collection = self
+                        .finder
+                        .data_set
+                        .get_mut(&self.staging_checksum)
+                        .unwrap();
+
+                    collection.retain(|x| {
+                        (x.status == FileAction::None)
+                            || (x.status == FileAction::Read)
+                            || (x.status == FileAction::Save)
+                    });
+                }
+
+                // DELETION/SUB TABLE
+                ui.add_space(5.0);
                 ScrollArea::vertical()
                     .id_source("bottom_scroll2")
                     .auto_shrink([false, false])
                     .max_height(130.)
                     .min_scrolled_height(130.)
                     .stick_to_right()
-                    .show(ui, |ui| { 
-                        // 
+                    .show(ui, |ui| {
+                        //
                         ui.vertical(|ui| {
-                            for row in &self.sub_staging {
+                            for row in self.sub_staging[..].iter_mut() {
                                 //********************************************************//
 
                                 //Formatting text for gui
                                 let date = get_created_date(&row.path);
                                 match &date {
                                     Ok(_) => {}
-                                    Err(e) => {
-                                        //println!("derror::ui::mod.rs::10001{} ", e);
+                                    Err(_) => {
                                         break;
                                     }
                                 }
@@ -282,61 +308,51 @@ impl epi::App for Application {
                                 let adjusted_byte = byte.get_appropriate_unit(false);
 
                                 let mut title: String;
-                                title = format!("▶ {} ", row.path); //▶  ▶
+                                title = format!("▶ {} ", row.path); //▶
                                 title = truncate(&title, 94).to_string();
-
                                 //'attemp to subtract with overflow'
                                 let diff = 95 - title.chars().count();
                                 let mut space = " ".to_string();
                                 for _ in 0..diff {
                                     space.push(' ');
                                 }
-
-                                title = [
-                                    title.to_string(),
-                                    space, 
-                                ]
-                                .join(" ");
+                                title = [title.to_string(), space].join(" ");
 
                                 ///////////////////////////////////////////////////////////////
 
-                                egui::Grid::new("grid_main_labels")
+                                egui::Grid::new("deletion_grid")
                                     .striped(true)
                                     .num_columns(5)
                                     .min_row_height(20.0)
                                     .spacing(egui::Vec2::new(0.0, 0.0))
                                     .show(ui, |ui| {
-                                        if ui.checkbox(&mut true, " ").clicked() {
-                                            // if row.ui_event_status {
-                                            //     row.status = FileAction::Delete;
-                                            // } else {
-                                            //     row.status = FileAction::Read;
-                                            // }
+                                        if ui.checkbox(&mut row.ui_event_status, " ").clicked() {
+                                            //
+                                            if row.ui_event_status {
+                                                row.status = FileAction::Delete;
+                                            } else {
+                                                row.status = FileAction::Read;
+                                            }
 
-                                            // let collection = self
-                                            //     .b
-                                            //     .data_set
-                                            //     .get_mut(&self.selected_collection)
-                                            //     .unwrap();
-                                            // for mut row2 in collection {
-                                            //     if row2.path == row.path {
-                                            //         if row.ui_event_status {
-                                            //             //row2.set_status(FileAction::Delete);
-                                            //             row2.status = FileAction::Delete;
-                                            //             row2.ui_event_status = true;
-                                            //         } else {
-                                            //             //row2.set_status(FileAction::Read);
-                                            //             row2.status = FileAction::Read;
-                                            //             row2.ui_event_status = false;
-                                            //         }
-                                            //     }
-                                            // }
+                                            //println!("collection => {:#?}", collection);
+                                            /* let collection = self
+                                                .finder
+                                                .data_set
+                                                .get_mut(&self.staging_checksum)
+                                                .unwrap();
 
-                                            /* let modifiers = ui.ctx().input().modifiers;
-                                            ui.ctx().output().open_url = Some(egui::output::OpenUrl {
-                                                url: row.path.to_owned(),
-                                                new_tab: modifiers.any(),
-                                            }); */
+                                            for mut row2 in collection {
+                                                if row2.path == row.path {
+                                                    //println!("row2 => {:#?}", row2);
+                                                    if row.ui_event_status {
+                                                        row2.status = FileAction::Delete;
+                                                        row2.ui_event_status = true;
+                                                    } else {
+                                                        row2.status = FileAction::Read;
+                                                        row2.ui_event_status = false;
+                                                    }
+                                                }
+                                            } */
                                         };
                                         ui.add_sized(
                                             [400.0, 15.0],
@@ -367,7 +383,7 @@ impl epi::App for Application {
                                             egui::Hyperlink::from_label_and_url("VIEW", &row.path),
                                         );
                                         ui.end_row();
-                                    }); 
+                                    });
                             }
                         });
                     }); //end of scroll
