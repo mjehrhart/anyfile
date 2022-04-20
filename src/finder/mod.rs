@@ -68,49 +68,56 @@ pub mod finder {
                 let bp = base_path.clone();
                 let temp = base_path.file_name().unwrap();
                 let path: String = String::from(temp.to_string_lossy());
-
                 let flag = !path.starts_with('.');
+
                 if flag {
-                    for entry in std::fs::read_dir(bp).unwrap_or_else(|e| {
-                        panic!("Error reading dir: {:?}, {}", temp, e);
-                        //process::exit(1);
-                    }) {
-                        let entry = entry;
+                    // IS Directory
+                    if bp.is_dir() {
+                        for entry in std::fs::read_dir(bp).unwrap() {
+                            match &entry {
+                                Ok(ent) => {
+                                    let entry = entry.unwrap();
+                                    let path = entry.path();
+                                    let spath = path.as_path().display().to_string();
 
-                        //println!("entry:: {:?}", &filter);
-
-                        match &entry {
-                            Ok(ent) => {
-                                let entry = entry.unwrap();
-                                let path = entry.path();
-                                let spath = path.as_path().display().to_string();
-
-                                if !path.starts_with(".") {
-                                    //let metadata = entry.metadata().unwrap();//
-                                    let metadata = entry.metadata();
-                                    match metadata {
-                                        Ok(md) => {
-                                            if md.is_dir() {
-                                                //If image filter is not checked
-                                                if !filter[2] {
-                                                    let photos = String::from(
+                                    if !path.starts_with(".") {
+                                        //let metadata = entry.metadata().unwrap();//
+                                        let metadata = entry.metadata();
+                                        match metadata {
+                                            Ok(md) => {
+                                                if md.is_dir() {
+                                                    //If image filter is not checked
+                                                    if !filter[2] {
+                                                        let photos = String::from(
                                                         "/Pictures/Photos Library.photoslibrary",
                                                     );
-                                                    let user_home = home::home_dir()
-                                                        .unwrap()
-                                                        .as_path()
-                                                        .display()
-                                                        .to_string();
+                                                        let user_home = home::home_dir()
+                                                            .unwrap()
+                                                            .as_path()
+                                                            .display()
+                                                            .to_string();
 
-                                                    let joined = [user_home, photos].join("");
+                                                        let joined = [user_home, photos].join("");
 
-                                                    //println!("joined:: {:?}, {:?}", &joined, &path);
-                                                    if spath == joined {
-                                                        println!(
-                                                            "Skipping Photos Library...{:?}",
-                                                            path
-                                                        );
-                                                        // Do nothing and skip this directory
+                                                        //println!("joined:: {:?}, {:?}", &joined, &path);
+                                                        if spath == joined {
+                                                            println!(
+                                                                "Skipping Photos Library...{:?}",
+                                                                path
+                                                            );
+                                                            // Do nothing and skip this directory
+                                                        } else {
+                                                            let move_entries = entries.clone();
+                                                            s.spawn(move |s1| {
+                                                                read_dir(
+                                                                    move_entries,
+                                                                    s1,
+                                                                    path,
+                                                                    chunk_size,
+                                                                    filter,
+                                                                )
+                                                            });
+                                                        }
                                                     } else {
                                                         let move_entries = entries.clone();
                                                         s.spawn(move |s1| {
@@ -123,78 +130,118 @@ pub mod finder {
                                                             )
                                                         });
                                                     }
-                                                } else {
-                                                    let move_entries = entries.clone();
-                                                    s.spawn(move |s1| {
-                                                        read_dir(
-                                                            move_entries,
-                                                            s1,
-                                                            path,
-                                                            chunk_size,
-                                                            filter,
-                                                        )
-                                                    });
-                                                }
-                                            } else if md.is_file() {
-                                                let p = path.as_path().display().to_string();
+                                                } else if md.is_file() {
+                                                    let p = path.as_path().display().to_string();
 
-                                                let ft = Finder::get_file_type(&p);
-                                                let mut flag_continue = false;
-                                                match ft {
-                                                    FileType::Audio => {
-                                                        if filter[0] {
+                                                    let ft = Finder::get_file_type(&p);
+                                                    let mut flag_continue = false;
+                                                    match ft {
+                                                        FileType::Audio => {
+                                                            if filter[0] {
+                                                                flag_continue = true;
+                                                            }
+                                                        }
+                                                        FileType::Document => {
+                                                            if filter[1] {
+                                                                flag_continue = true;
+                                                            }
+                                                        }
+                                                        FileType::Image => {
+                                                            if filter[2] {
+                                                                flag_continue = true;
+                                                            }
+                                                        }
+                                                        FileType::Other => {
+                                                            if filter[3] {
+                                                                flag_continue = true;
+                                                            }
+                                                        }
+                                                        FileType::Video => {
+                                                            if filter[4] {
+                                                                flag_continue = true;
+                                                            }
+                                                        }
+                                                        FileType::None => {}
+                                                        FileType::All => {
                                                             flag_continue = true;
                                                         }
                                                     }
-                                                    FileType::Document => {
-                                                        if filter[1] {
-                                                            flag_continue = true;
-                                                        }
-                                                    }
-                                                    FileType::Image => {
-                                                        if filter[2] {
-                                                            flag_continue = true;
-                                                        }
-                                                    }
-                                                    FileType::Other => {
-                                                        if filter[3] {
-                                                            flag_continue = true;
-                                                        }
-                                                    }
-                                                    FileType::Video => {
-                                                        if filter[4] {
-                                                            flag_continue = true;
-                                                        }
-                                                    }
-                                                    FileType::None => {}
-                                                    FileType::All => {
-                                                        flag_continue = true;
-                                                    }
-                                                }
 
-                                                if flag_continue == true {
-                                                    let async_results =
-                                                        Finder::async_file_metadata_join(
-                                                            &p, chunk_size,
-                                                        );
-                                                    let x = futures::executor::block_on({
-                                                        async_results
-                                                    });
+                                                    if flag_continue == true {
+                                                        let async_results =
+                                                            Finder::async_file_metadata_join(
+                                                                &p, chunk_size,
+                                                            );
+                                                        let x = futures::executor::block_on({
+                                                            async_results
+                                                        });
 
-                                                    entries.lock().unwrap().push(x);
+                                                        entries.lock().unwrap().push(x);
+                                                    }
                                                 }
                                             }
-                                        }
-                                        Err(e) => {
-                                            println!("{:?}", &entry);
-                                            println!("derrror:1002 {}", e);
+                                            Err(e) => {
+                                                println!("{:?}", &entry);
+                                                println!("derrror:1002 {}", e);
+                                            }
                                         }
                                     }
                                 }
+                                Err(e) => {
+                                    dbg!("{:?}", &entry);
+                                    dbg!("derrror:1003 {}", e);
+                                }
                             }
-                            Err(e) => {
-                                println!("{:?}", &entry);
-                                println!("derrror:1003 {}", e);
+                        }
+                    // IS File
+                    } else {
+                        dbg!("{:?}", &bp);
+                        let entry = bp.clone();
+
+                        if !path.starts_with(".") {
+                            //let p = path.as_path().display().to_string();
+                            let p = bp.into_os_string().into_string();
+                            let p = p.unwrap();
+                            let ft = Finder::get_file_type(&p);
+                            let mut flag_continue = false;
+                            match ft {
+                                FileType::Audio => {
+                                    if filter[0] {
+                                        flag_continue = true;
+                                    }
+                                }
+                                FileType::Document => {
+                                    if filter[1] {
+                                        flag_continue = true;
+                                    }
+                                }
+                                FileType::Image => {
+                                    if filter[2] {
+                                        flag_continue = true;
+                                    }
+                                }
+                                FileType::Other => {
+                                    if filter[3] {
+                                        flag_continue = true;
+                                    }
+                                }
+                                FileType::Video => {
+                                    if filter[4] {
+                                        flag_continue = true;
+                                    }
+                                }
+                                FileType::None => {}
+                                FileType::All => {
+                                    flag_continue = true;
+                                }
+                            }
+
+                            if flag_continue == true {
+                                let async_results =
+                                    Finder::async_file_metadata_join(&p, chunk_size);
+                                let x = futures::executor::block_on({ async_results });
+
+                                entries.lock().unwrap().push(x);
                             }
                         }
                     }
@@ -282,7 +329,7 @@ pub mod finder {
                     }
                 }
             }
-        } 
+        }
         //ActionEvents
         fn insert_item(&mut self, checksum: String, mut meta: Meta) {
             if !self.data_set.contains_key(&checksum) {
@@ -363,19 +410,19 @@ pub mod finder {
             let mut chunk_size = chunk_size;
             match ft {
                 enums::FileType::Image => {
-                    chunk_size = 57344;     //57.344kb
+                    chunk_size = 57344; //57.344kb
                 }
                 FileType::Audio => {
-                    chunk_size = 8192;      //8.192kp
+                    chunk_size = 8192; //8.192kp
                 }
                 FileType::Video => {
-                    chunk_size = 28672;     //28.672kb
+                    chunk_size = 28672; //28.672kb
                 }
                 FileType::Document => {
-                    chunk_size = 163840;    //163.84kb  needs to be high for PDF matching
+                    chunk_size = 163840; //163.84kb  needs to be high for PDF matching
                 }
                 FileType::Other => {
-                    chunk_size = 8192;      //8.192kp
+                    chunk_size = 8192; //8.192kp
                 }
                 FileType::None => {
                     chunk_size = 0;
@@ -488,3 +535,67 @@ pub mod finder {
         std::any::type_name::<T>()
     }
 }
+
+/*
+
+let metadata = &bp.metadata();
+                            match metadata {
+                                Ok(md) => {
+                                    if md.is_dir() {
+                                        //DO Nothing
+                                    } else if md.is_file() {
+                                        //let p = path.as_path().display().to_string();
+                                        let p = bp.into_os_string().into_string();
+                                        let p = p.unwrap();
+                                        let ft = Finder::get_file_type(&p);
+                                        let mut flag_continue = false;
+                                        match ft {
+                                            FileType::Audio => {
+                                                if filter[0] {
+                                                    flag_continue = true;
+                                                }
+                                            }
+                                            FileType::Document => {
+                                                if filter[1] {
+                                                    flag_continue = true;
+                                                }
+                                            }
+                                            FileType::Image => {
+                                                if filter[2] {
+                                                    flag_continue = true;
+                                                }
+                                            }
+                                            FileType::Other => {
+                                                if filter[3] {
+                                                    flag_continue = true;
+                                                }
+                                            }
+                                            FileType::Video => {
+                                                if filter[4] {
+                                                    flag_continue = true;
+                                                }
+                                            }
+                                            FileType::None => {}
+                                            FileType::All => {
+                                                flag_continue = true;
+                                            }
+                                        }
+
+                                        if flag_continue == true {
+                                            let async_results =
+                                                Finder::async_file_metadata_join(&p, chunk_size);
+                                            let x = futures::executor::block_on({ async_results });
+
+                                            entries.lock().unwrap().push(x);
+                                        }
+                                    }
+                                }
+                                Err(e) => {
+                                    println!("{:?}", &entry);
+                                    println!("derrror:1002 {}", e);
+                                }
+                            }
+
+
+
+*/

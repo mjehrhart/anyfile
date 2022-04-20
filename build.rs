@@ -8,33 +8,33 @@ fn main() {
     //Create Folder Stucture
     let mut mkdir = Command::new("mkdir");
     mkdir.arg("target/public");
-    let com = mkdir.output().expect("failed to execute process");
+    let _com = mkdir.output().expect("failed to execute process");
 
     let mut mkdir = Command::new("mkdir");
     mkdir.arg("target/public/app.app");
-    let com = mkdir.output().expect("failed to execute process");
+    let _com = mkdir.output().expect("failed to execute process");
 
     let mut mkdir = Command::new("mkdir");
     mkdir.arg("target/public/app.app/Contents");
-    let com = mkdir.output().expect("failed to execute process");
+    let _com = mkdir.output().expect("failed to execute process");
 
     let mut mkdir = Command::new("mkdir");
     mkdir.arg("target/public/app.app/Contents/Resources");
-    let com = mkdir.output().expect("failed to execute process");
+    let _com = mkdir.output().expect("failed to execute process");
 
     let mut mkdir = Command::new("mkdir");
     mkdir.arg("target/public/app.app/Contents/Macos");
-    let com = mkdir.output().expect("failed to execute process");
+    let _com = mkdir.output().expect("failed to execute process");
 
     //Copy target release to Macos Folder
     let mut cp = Command::new("cp");
     cp.arg("target/debug/sandbox").arg("target/public/app.app/Contents/Macos/");
-    let com = cp.output().expect("failed to execute process");
+    let _com = cp.output().expect("failed to execute process");
 
     //Copy icon to Resource Folder
     let mut cp = Command::new("cp");
     cp.arg("resources/duplicate2.png").arg("target/public/app.app/Contents/Resources/");
-    let com = cp.output().expect("failed to execute process");
+    let _com = cp.output().expect("failed to execute process");
 
     //Create Info.Plist 
     let plist = b"<?xml version=\"1.0\" encoding=\"UTF-8\"?>
