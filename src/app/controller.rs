@@ -15,6 +15,7 @@ pub struct Application<'a> {
     pub test_size2: f32,
     pub test_offset: egui::Vec2,
     pub test_size: egui::Vec2,
+    pub stage: Vec<Meta>,
     pub staging: Vec<(String, Vec<Meta>)>,
     pub staging2: Vec<(&'a String, &'a Vec<Meta>)>,
     pub directory: String,
@@ -27,6 +28,7 @@ impl Application<'_> {
     pub fn default() -> Self {
         Self {
             //
+            stage: vec![],
             staging: vec![],
             staging2: vec![],
             directory: String::new(),
@@ -101,8 +103,9 @@ impl epi::App for Application<'_> {
                 let single_file = return_dfer2(&sd, filter);
                 needles.push(single_file.data_set);
             }
+
             // Clear self.staging
-            self.staging.clear();
+            self.stage.clear();
 
             //println!("needles => {:#?}", needles);
 
@@ -114,25 +117,42 @@ impl epi::App for Application<'_> {
             let multi = multi_batch.data_set;
 
             // Empty vec to store matches
-            let mut matched = vec![];
+            //let mut matched = vec![];
             // Loop through files to find matches
-            for i in 0..needles.len() {
-                for (key, value) in &needles[i] {
-                    // Loop through multi
-                    for item in multi.clone() {
-                        //println!("{:#?}", &item.1.l);
-                        if (key == &item.0)
-                        //&& (value[0].path != item.1[0].path)
-                        {
-                            matched.push(item);
+            // for i in 0..needles.len() {
+            //     for (key, value) in &needles[i] {
+            //         // Loop through multi
+            //         for item in multi {
+            //             //println!("{:#?}", &item.1.l);
+            //             if (*key == item.0)
+            //             //&& (value[0].path != item.1[0].path)
+            //             {
+            //                 //matched.push(item);
+            //                 self.staging.push(item.clone());
+            //             }
+            //         }
+            //     }
+            // }
+
+            // Matching records here
+            for item in multi {
+                let (_, list) = item;
+                for row in list {
+                    for i in 0..needles.len() {
+                        for (key, value) in needles[i].clone() {
+                            if key == row.checksum && value[0].path != row.path {
+                                self.stage.push(row.clone());
+                            }
                         }
                     }
                 }
             }
 
-            self.staging = matched.clone();
+            println!("self.stage => {:#?}", &self.stage);
 
-            if self.staging.len() == 0 {
+            //self.staging = matched.clone();
+
+            if self.stage.len() == 0 {
                 let tmp = egui::Vec2::new(260.0, 260.0);
                 _frame.set_window_size(tmp)
             } else {
@@ -254,63 +274,28 @@ impl epi::App for Application<'_> {
                     .show(ui, |ui| {
                         //
                         ui.vertical(|ui| {
-                            for row in &self.staging {
-                                // adjusted_byte
-                                //let diff = 100 - &row.1[0].name.to_string().chars().count();
-                                // title
-                                let mut title = row.1[0].name.to_lowercase();
-                                if title.len() < 100 {
-                                    title = title[0..title.len()].to_string();
-                                } else {
-                                    title = title[0..100].to_string();
-                                }
-
-                                let diff = 100 - title.to_string().chars().count();
-                                let mut space: String = String::from("");
-                                for _ in 0..diff {
-                                    space.push(' ');
-                                }
-                                title = [title.to_string(), space].join("");
-
-                                ui.with_layout(egui::Layout::top_down(egui::Align::LEFT), |ui| {
-                                    ui.add(egui::Label::new(
-                                        egui::RichText::new(title)
-                                            .color(egui::Color32::from_rgb(255, 255, 255))
-                                            .monospace(),
-                                    ));
-                                });
+                            for row in &self.stage {
                                 egui::Grid::new("grid_main_labels")
                                     .striped(true)
                                     .num_columns(2)
                                     .striped(true)
                                     .spacing(egui::Vec2::new(10.0, 0.0))
                                     .show(ui, |ui| {
-                                        ui.with_layout(
-                                            egui::Layout::top_down(egui::Align::RIGHT),
-                                            |ui| {
-                                                for item in &row.1 {
-                                                    let full_title = get_table_fields(item);
+                                        let full_title = get_table_fields(row);
 
-                                                    ui.add_sized(
-                                                        [600., 10.0],
-                                                        egui::Button::new(
-                                                            egui::RichText::new(full_title)
-                                                                .color(egui::Color32::from_rgb(
-                                                                    255, 255, 255,
-                                                                ))
-                                                                .monospace(),
-                                                        )
-                                                        //.fill(egui::Color32::from_rgb(49, 90, 125)),
-                                                        .fill(egui::Color32::TRANSPARENT),
-                                                    );
-                                                    ui.add_sized(
-                                                        [100.0, 10.0],
-                                                        egui::Hyperlink::from_label_and_url(
-                                                            "VIEW", &item.path,
-                                                        ),
-                                                    );
-                                                }
-                                            },
+                                        ui.add_sized(
+                                            [600., 10.0],
+                                            egui::Button::new(
+                                                egui::RichText::new(full_title)
+                                                    .color(egui::Color32::from_rgb(255, 255, 255))
+                                                    .monospace(),
+                                            )
+                                            //.fill(egui::Color32::from_rgb(49, 90, 125)),
+                                            .fill(egui::Color32::TRANSPARENT),
+                                        );
+                                        ui.add_sized(
+                                            [20.0, 10.0],
+                                            egui::Hyperlink::from_label_and_url("VIEW", &row.path),
                                         );
                                     });
                             }
