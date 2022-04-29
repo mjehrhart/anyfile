@@ -6,8 +6,7 @@ pub struct Config {
     pub author: String, 
     pub auth_token: String,
     pub email: String,
-    pub username: String,
-    pub tree: String,
+    pub username: String, 
 }
 
 pub fn get_config(path: &Path) -> Config {
@@ -19,7 +18,6 @@ pub fn get_config(path: &Path) -> Config {
         author: config.author,
         auth_token: config.auth_token,
         email: config.email,
-        username: config.username,
-        tree: config.tree
+        username: config.username, 
     } 
 }

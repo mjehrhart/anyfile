@@ -1,7 +1,12 @@
 [package]
-name = "sandbox"
-version = "0.1.0"
-edition = "2021"
+name = "anyfile"
+version = "0.0.1"
+edition = "2021" 
+authors = ["mjehrhart <https://github.com/mjehrhart>"] 
+license = "MIT"
+repository = "https://github.com/mjehrhart/minty"
+description = "Esily drag & drop files to a repo for easy sharing."
+keywords = ["github", "asset", "filesystem", "minty", "ffind"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

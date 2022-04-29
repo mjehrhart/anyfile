@@ -8,15 +8,8 @@ fn main() {
     //
     let path = PathBuf::from("./config.json");
     let config = config::get_config(&path);
-
-    //let _x = requests::get_repo_branches::get_repo_branches(&config, "assets".to_string());
-    //println!("..{:#?}", _x);
-    //let base64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=".to_string();
-    //let _x = requests::put_test::put_test(config.clone(), base64);
-
+ 
     //***************************************************** */
-    // UI
-    //***************************************************** */
-    //
+    // UI  
     app::controller::run(config);
 }
