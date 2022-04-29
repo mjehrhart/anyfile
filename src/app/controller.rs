@@ -62,7 +62,7 @@ impl Application {
         //
         // Load combobox with repo names
         let repo_list = requests::get_repos::get_repo_list_by_user(&self.config);
-
+ 
         // Load reult into self.repo_list
         for item in repo_list.unwrap() {
             self.repo_list.push(item.name);

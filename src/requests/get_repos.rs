@@ -31,14 +31,17 @@ pub fn get_repo_list_by_user(
         .header(CONTENT_TYPE, "application/vnd.github.v3+json")
         .header(ACCEPT, "application/json")
         .send()?;
- 
-    let response: Vec<RepoList> = res.json().unwrap();
-
-    Ok(response)
+  
+    match res.json::<Vec<RepoList>>() {
+        Ok(response) => { 
+            Ok(response)
+        }
+        Err(e) => Err(Box::new(e))
+    }
 }
 
 // Form Bearer Auth Token
 pub fn format_auth_token(config: &Config) -> String{
-    let token = format!("Bearer {auth_token}", auth_token = config.auth_token);
+    let token = format!("Bearer {auth_token}", auth_token = config.auth_token); 
     token
 }

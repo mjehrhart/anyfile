@@ -63,6 +63,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "000444226fcff248f2bc4c7625be32c63caccfecc2723a2b9f78a7487a49c407"
 
 [[package]]
+name = "anyfile"
+version = "0.0.1"
+dependencies = [
+ "base64",
+ "clipboard",
+ "cookie",
+ "eframe",
+ "egui",
+ "egui_extras",
+ "futures",
+ "image",
+ "rand",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
 name = "arrayref"
 version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2190,25 +2209,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "93fc1dc3aaa9bfed95e02e6eadabb4baf7e3078b0bd1b4d7b6b0b68378900502"
 dependencies = [
  "winapi-util",
-]
-
-[[package]]
-name = "sandbox"
-version = "0.1.0"
-dependencies = [
- "base64",
- "clipboard",
- "cookie",
- "eframe",
- "egui",
- "egui_extras",
- "futures",
- "image",
- "rand",
- "reqwest",
- "serde",
- "serde_json",
- "tokio",
 ]
 
 [[package]]
