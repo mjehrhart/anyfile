@@ -1,5 +1,5 @@
 // build.rs
-use std::fs::{self, File};
+use std::fs::{File};
 use std::io::prelude::*;
 use std::process::Command;
 
