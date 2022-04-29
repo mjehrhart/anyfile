@@ -1,5 +1,5 @@
 # AnyFile
-Store and retrieve asset files from your public repo. 
+Store and retrieve asset files from your public repo without opening GitHub website. 
 
 <img width="100%" alt="images/Screen Shot 2022-04-29 at 1.21.20 PM_59GzW2sxvBz5gmGV.png" src="https://raw.githubusercontent.com/mjehrhart/assets/main/images/Screen Shot 2022-04-29 at 1.21.20 PM_59GzW2sxvBz5gmGV.png">
 
