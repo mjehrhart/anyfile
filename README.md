@@ -3,11 +3,15 @@ An easier way to store and retrieve asset files from your public repo.
   
 <img width="60%" alt="images/anyfile_view_drag_and_drop_6VfWv4CA7QEH95Ul.gif" src="https://raw.githubusercontent.com/mjehrhart/assets/main/images/anyfile_view_drag_and_drop_6VfWv4CA7QEH95Ul.gif">
   
+## About
 I needed an easier method to store screenshots and .gifs for github docs: readme, issues, discussions, etc...
 
-I was tired of opening the github web page to upload a new screenshot so I created this little app.  Draggine files onto the app will 
+I was tired of opening the github web page to upload a new screenshot so I created this little app.  Dragging files onto the app will 
 upload the file to your repository. You can view the file, click on the file to obtain an http image tag and can even remove files from your repo. 
 
+Anyfile is writtern purely in Rust! Egui is the frontend library.
+
+## Uses
 Generate an http image tag by clicking on the file:  
 <img width="60%" alt="images/anyfile_generate_image_tag_prnBBxRbBd1OhPiy.gif" src="https://raw.githubusercontent.com/mjehrhart/assets/main/images/anyfile_generate_image_tag_prnBBxRbBd1OhPiy.gif">
   
