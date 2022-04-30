@@ -64,7 +64,7 @@ checksum = "000444226fcff248f2bc4c7625be32c63caccfecc2723a2b9f78a7487a49c407"
 
 [[package]]
 name = "anyfile"
-version = "0.0.1"
+version = "1.0.2"
 dependencies = [
  "base64",
  "clipboard",
@@ -73,6 +73,7 @@ dependencies = [
  "egui",
  "egui_extras",
  "futures",
+ "home",
  "image",
  "rand",
  "reqwest",
@@ -1173,6 +1174,15 @@ name = "hex"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
+
+[[package]]
+name = "home"
+version = "0.5.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2456aef2e6b6a9784192ae780c0f15bc57df0e918585282325e8c8ac27737654"
+dependencies = [
+ "winapi",
+]
 
 [[package]]
 name = "http"

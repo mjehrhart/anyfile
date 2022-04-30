@@ -35,13 +35,14 @@ pub struct Application {
 
 #[allow(dead_code)]
 impl Application {
+    //
     pub fn default(config: Config) -> Self {
         Self { 
             branch_list: vec![],
-            branch_list_index: 0,
+            branch_list_index: 0,        
             config,
             repo_list: vec![],
-            repo_list_index: 0,
+            repo_list_index: 1,         //Testing
             pre_staging: vec![],  
             staging: vec![],
             image_exit: RetainedImage::from_svg_bytes(
@@ -198,7 +199,7 @@ impl Application {
                 extrusion: 0.0,
                 color: Color32::TRANSPARENT,
             }, 
-            fill: Color32::from_rgb(197,216,232),
+            fill: Color32::from_rgb(70, 130, 180),
             //fill: Color32::TRANSPARENT,
             stroke: egui::Stroke::new(0.0, Color32::from_rgb(255, 255, 255)),
         };
@@ -329,28 +330,62 @@ impl Application {
 
 impl epi::App for Application {
     fn name(&self) -> &str {
-        "AnyFile 0.0.1"
+        "AnyFile 1.0.2"
     }
 
     fn setup(&mut self, _ctx: &egui::Context, _frame: &epi::Frame, _storage: Option<&dyn Storage>) {
  
-        // Load repos
-        self::Application::get_list_of_repos_by_user(self);
+        if !self.config.auth_token.is_empty() && !self.config.username.is_empty()  {
+            // Load repos
+            self::Application::get_list_of_repos_by_user(self);
 
-        // Load branches for repo
-        self::Application::get_branches_by_repo(self);
+            // Load branches for repo
+            self::Application::get_branches_by_repo(self);
 
-        // Load repo files
-        self::Application::get_list_of_files_by_repo(self); 
+            // Load repo files
+            self::Application::get_list_of_files_by_repo(self); 
+        }
     }
 
     fn update(&mut self, ctx: &egui::Context, _frame: &epi::Frame) { 
         
-        self::Application::add_file_drag_drop_support(self, ctx);
-        
-        self::Application::add_top_bar(self, ctx, _frame);
+        if !self.config.auth_token.is_empty() && !self.config.username.is_empty()  {
+
+            self::Application::add_file_drag_drop_support(self, ctx);
+            
+            self::Application::add_top_bar(self, ctx, _frame);
+    
+            self::Application::show_main_table(self, ctx, _frame);
+
+        }  else {
+
+            let home_dir = home::home_dir().unwrap().as_path().display().to_string();
+            let path_joined = [home_dir, ".anyfile/config.json".to_string()].join("/");
+            let text = ["Please fillout ".to_string(), path_joined.to_string(), " to connect to GitHub.".to_string()].join("");
  
-        self::Application::show_main_table(self, ctx, _frame);
+             egui::CentralPanel::default() 
+            .show(ctx, |ui| {
+                //
+                ui.add_space(15.0);
+
+                egui::Grid::new("grid_main_labels")
+                .striped(true)
+                .num_columns(1)
+                .striped(true)
+                .spacing(egui::Vec2::new(10.0, 0.0))
+                .show(ui, |ui| {
+                    ui.add_sized(
+                        [550., 35.0],
+                        egui::Label::new(
+                            egui::RichText::new(text)
+                                .color(egui::Color32::from_rgb(10, 10, 10))
+                                .monospace(),
+                        ) 
+                    ); 
+                }); 
+
+            });
+        }
     }
 } 
  
@@ -371,3 +406,5 @@ pub fn run(config: crate::config::Config) {
         options,
     );
 }
+
+ 

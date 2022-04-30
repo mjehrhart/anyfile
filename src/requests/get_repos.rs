@@ -1,6 +1,6 @@
 use reqwest::{
     self,
-    header::{ACCEPT, CONTENT_TYPE, USER_AGENT, AUTHORIZATION},
+    header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, USER_AGENT},
 };
 use serde::{Deserialize, Serialize};
 
@@ -15,7 +15,7 @@ pub struct RepoList {
 
 pub fn get_repo_list_by_user(
     config: &crate::config::Config,
-) -> Result<Vec<RepoList>, Box<dyn std::error::Error>> {
+) -> Result<Vec<RepoList>, Box<dyn std::error::Error>> { //Vec<RepoList>
     // Step 1
     let request_url = format!(
         "https://api.github.com/users/{user}/repos",
@@ -31,17 +31,21 @@ pub fn get_repo_list_by_user(
         .header(CONTENT_TYPE, "application/vnd.github.v3+json")
         .header(ACCEPT, "application/json")
         .send()?;
-  
+
+    let status_code = res.status();
+
+    // println!("status_code => {:#?}", status_code); 
+    // println!("res.text() => {:#?}", &res.text());
+    // Ok(())
+    
     match res.json::<Vec<RepoList>>() {
-        Ok(response) => { 
-            Ok(response)
-        }
-        Err(e) => Err(Box::new(e))
-    }
+        Ok(response) => Ok(response),
+        Err(e) => Err(Box::new(e)),
+    } 
 }
 
 // Form Bearer Auth Token
-pub fn format_auth_token(config: &Config) -> String{
-    let token = format!("Bearer {auth_token}", auth_token = config.auth_token); 
+pub fn format_auth_token(config: &Config) -> String {
+    let token = format!("Bearer {auth_token}", auth_token = config.auth_token);
     token
 }

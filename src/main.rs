@@ -3,19 +3,16 @@ mod config;
 mod requests;
 
 use std::path::PathBuf;
+//use home::home_dir;
 
-fn main() {
-    // Config file format in json 
-    /* { 
-        "author": "",           // Any name
-        "email": "",            // Github email (maybe it can be any email address)
-        "auth_token": "",       // Get this from github --> settings --> developer settings -> personal auth token
-        "username": ""          // Github login name
-    } */
-    let path = PathBuf::from("./config.json");
-    let config = config::get_config(&path);
- 
+fn main() { 
+    
+    let home_dir = home::home_dir().unwrap().as_path().display().to_string();
+    let path_joined = [home_dir, ".anyfile/config.json".to_string()].join("/");
+    let path = PathBuf::from(path_joined); 
+
+    let config = config::get_config(&path); 
     //***************************************************** */
-    // UI  
-    app::controller::run(config);
+    // UI
+    app::controller::run(config)
 }

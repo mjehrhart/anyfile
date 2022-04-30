@@ -24,7 +24,8 @@ impl Application {
                 extrusion: 0.0,
                 color: Color32::TRANSPARENT,
             },
-            fill: Color32::from_rgb(197, 216, 232),
+            //fill: Color32::from_rgb(197, 216, 232),
+            fill: Color32::from_rgb(70, 180, 175),
             stroke: egui::Stroke::new(0.0, Color32::from_rgb(255, 255, 255)),
         };
 
@@ -119,7 +120,9 @@ impl Application {
 
                         // ************************************************************************************************ //
                     });
-                });
+
+                    ui.add_space(5.0);
+                }); 
             });
     }
 }
