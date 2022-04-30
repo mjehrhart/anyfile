@@ -1,5 +1,5 @@
 # AnyFile
-An easier way to store and retrieve asset files from your public repo. 
+An easier way to store and reference asset files from your public repo. 
   
 <img width="60%" alt="images/anyfile_view_drag_and_drop_6VfWv4CA7QEH95Ul.gif" src="https://raw.githubusercontent.com/mjehrhart/assets/main/images/anyfile_view_drag_and_drop_6VfWv4CA7QEH95Ul.gif">
   
