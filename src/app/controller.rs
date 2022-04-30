@@ -42,7 +42,7 @@ impl Application {
             branch_list_index: 0,        
             config,
             repo_list: vec![],
-            repo_list_index: 1,         //Testing
+            repo_list_index: 0,         //Testing
             pre_staging: vec![],  
             staging: vec![],
             image_exit: RetainedImage::from_svg_bytes(

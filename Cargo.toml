@@ -1,11 +1,11 @@
 [package]
 name = "anyfile"
-version = "1.0.2"
+version = "1.0.3"
 edition = "2021" 
 authors = ["mjehrhart <https://github.com/mjehrhart>"] 
 license = "MIT"
 repository = "https://github.com/mjehrhart/minty"
-description = "Esily drag & drop files to a repo for easy sharing."
+description = "An easier way to store and reference asset files from your public repo"
 keywords = ["github", "asset", "filesystem", "minty", "ffind"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
