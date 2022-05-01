@@ -28,7 +28,7 @@ Remove files:
 #### Hombebrew
 ```
 brew tap mjehrhart/anyfile
-brew install mjehrhart/anyfile/minanyfilety
+brew install mjehrhart/anyfile/anyfile
 ```
 
 #### Upgrade
