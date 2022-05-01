@@ -25,8 +25,11 @@ Generate an http image tag by clicking on the file:
 <img width="60%" alt="images/anyfile_v1.0.4_image_tag_ObOArkWUNbbCWmqV.gif" src="https://raw.githubusercontent.com/mjehrhart/assets/main/images/anyfile_v1.0.4_image_tag_ObOArkWUNbbCWmqV.gif">  
   
 Remove files:  
-<img width="60%" alt="images/Screen Recording 2022-05-01 at 8.35.53 AM_xAOBcchGccgzEPk9.gif" src="https://raw.githubusercontent.com/mjehrhart/assets/main/images/Screen Recording 2022-05-01 at 8.35.53 AM_xAOBcchGccgzEPk9.gif">
+<img width="60%" alt="images/Screen Recording 2022-05-01 at 8.35.53 AM_xAOBcchGccgzEPk9.gif" src="https://raw.githubusercontent.com/mjehrhart/assets/main/images/Screen Recording 2022-05-01 at 8.35.53 AM_xAOBcchGccgzEPk9.gif">  
   
+View files:  
+<img width="60%" alt="images/anyfile_1.0.4_view_image_MdnYgEH0e2xnru3z.gif" src="https://raw.githubusercontent.com/mjehrhart/assets/main/images/anyfile_1.0.4_view_image_MdnYgEH0e2xnru3z.gif">  
+
 ## Installation
 #### Hombebrew
 ```
