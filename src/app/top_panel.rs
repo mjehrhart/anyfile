@@ -25,13 +25,15 @@ impl Application {
                 color: Color32::TRANSPARENT,
             },
             //fill: Color32::from_rgb(197, 216, 232),
-            fill: Color32::from_rgb(70, 180, 175),
+            //fill: Color32::from_rgb(49, 90, 125),
+            fill: Color32::from_rgb(70, 130, 180),
             stroke: egui::Stroke::new(0.0, Color32::from_rgb(255, 255, 255)),
         };
 
         egui::TopBottomPanel::top("top_panel")
             .frame(frame_style_2)
             .show(ctx, |ui| {
+                ui.add_space(10.0);
                 ui.with_layout(egui::Layout::left_to_right(), |ui| {
                     // ************************************************************************************************ //
                     // Combobox Repo List

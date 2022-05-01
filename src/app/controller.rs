@@ -30,6 +30,8 @@ pub struct Application {
     pub repo_list: Vec<String>,
     pub repo_list_index: usize, 
     pub image_exit: RetainedImage,
+    pub image_delete: RetainedImage,
+    pub image_view: RetainedImage,
     pub image_reload: RetainedImage, 
 }
 
@@ -48,6 +50,16 @@ impl Application {
             image_exit: RetainedImage::from_svg_bytes(
                 "Exit",
                 include_bytes!("../../resources/close.svg"),
+            )
+            .unwrap(), 
+            image_delete: RetainedImage::from_image_bytes(
+                "Delete",
+                include_bytes!("../../resources/delete-2.png"),
+            )
+            .unwrap(), 
+            image_view: RetainedImage::from_image_bytes(
+                "View",
+                include_bytes!("../../resources/eye-2.png"),
             )
             .unwrap(), 
             image_reload: RetainedImage::from_image_bytes(  "Settingd",
@@ -209,105 +221,130 @@ impl Application {
             .frame(frame_style_2) 
             .show(ctx, |ui| {
                 //
-                ui.add_space(15.0);
+                ui.add_space(10.0);
                 ScrollArea::vertical()
                     .id_source("main_scroll_area")
                     .auto_shrink([false, false]) 
+                    .max_height(200.)
                     .stick_to_right()
                     .show(ui, |ui| { 
-                ui.vertical(|ui| {
-                    //
-                    let mut i = 0; 
- 
-                    // Table for repo list of files 
-                    for row in self.staging.to_owned(){ 
-                    //for row in self.staging2.iter_mut().cloned(){ 
+                    ui.vertical(|ui| {
+                        //
+                        let mut i = 0; 
+    
+                        // Table for repo list of files 
+                        for row in self.staging.to_owned(){ 
+                        //for row in self.staging2.iter_mut().cloned(){ 
 
-                        let fill_color:egui::Color32  = if self.pre_staging.contains(&row.path) {
-                            egui::Color32::from_rgb(49, 90, 125)
-                        } else {
-                            egui::Color32::from_rgb(123,167,204)
-                        };
-                            
-                        if row.mode == "040000"{ 
-                            //do nothing
-                        }
-                        else {
-                            egui::Grid::new("grid_repo_file_list")
-                            .striped(true)  
-                            .show(ui, |ui| {
-                                //
-                                // ************************************************************************************************ //
-                                if ui
-                                .add_sized( 
-                                    [500.0, 20.0],
-                                    egui::Button::new(
-                                        egui::RichText::new(&row.path)
-                                            .color(egui::Color32::from_rgb(255, 255, 255))
-                                            .monospace(),
-                                    )
-                                    .fill(fill_color),
-                                ).clicked(){
-                                    let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
-
-                                    let url = [
-                                        "https://raw.githubusercontent.com/mjehrhart/".to_string(),
-                                        self.repo_list[self.repo_list_index].to_string(),
-                                        "/main/".to_string(),
-                                        row.path.to_string()
-                                    ].join("");
-
-                                    // Send http_img to computer Clipboard
-                                    let http_img = format!(
-                                            "<img width=\"100%\" alt=\"{name}\" src=\"{download_url}\">",
-                                            name = row.path,
-                                            download_url = url
-                                        );
-
-                                    ctx.set_contents(http_img).unwrap();
-                                }
-
-                                // ************************************************************************************************ //
-                                // REMOVE
-                                if ui
-                                    .add_sized( 
-                                        [35.0, 20.0],
-                                        egui::Button::new(
-                                            egui::RichText::new("Remove")
-                                                .color(egui::Color32::from_rgb(255, 255, 255))
-                                                .monospace(),
-                                        )
-                                        .fill(fill_color),
-                                    )
-                                    .clicked()
-                                {  
-                                    // Remove file from cloud and ui
-                                    self::Application::delete_file_from_cloud(self, row.clone(), i);
-                                }
-
-                                // ************************************************************************************************ //
-                                // VIEW 
-                                let go_url = [
-                                        "https://raw.githubusercontent.com/mjehrhart/".to_string(),
-                                        self.repo_list[self.repo_list_index].to_string(),
-                                        "/main/".to_string(),
-                                        row.path.to_string()
-                                    ].join("");
-
-                                ui.add_sized(
-                                    [35.0, 20.0],
-                                    egui::Hyperlink::from_label_and_url("View".to_string(), &go_url),
-                                ); 
-                            
-                            });  
+                            let fill_color:egui::Color32  = if self.pre_staging.contains(&row.path) {
+                                //egui::Color32::from_rgb(49, 90, 125)
+                                egui::Color32::from_rgb(123,167,204)
+                            } else {
+                                //egui::Color32::from_rgb(123,167,204)
+                                egui::Color32::from_rgb(70, 130, 180)
+                            };
                                 
-                        }
+                            if row.mode == "040000"{ 
+                                //do nothing
+                            }
+                            else {
+                                egui::Grid::new("grid_repo_file_list")
+                                .num_columns(3)
+                                .striped(true)  
+                                .spacing([0.0, 0.0])
+                                .show(ui, |ui| { 
+                                    //
+                                    // ************************************************************************************************ //
+                                    // REMOVE File
+                                    // ************************************************************************************************ //
+                                    let image_delete = self.image_delete.size_vec2(); 
+                                    let image_delete = egui::ImageButton::new(
+                                        self.image_delete.texture_id(ctx),
+                                        [image_delete.x / 32., image_delete.y / 32.],
+                                    )
+                                    .frame(true);
 
-                        i += 1;
-                    }
-                  
-                }); 
+                                    if ui.add_sized( [2.0, 20.0],image_delete,).double_clicked()
+                                    {   
+                                        // Remove file from cloud and ui
+                                        self::Application::delete_file_from_cloud(self, row.clone(), i);
+                                    }
+  
+                                    // ************************************************************************************************ //
+                                    // VIEW File
+                                    //************************************************************************************************** */
+                                    let go_url = [
+                                            "https://raw.githubusercontent.com/mjehrhart/".to_string(),
+                                            self.repo_list[self.repo_list_index].to_string(),
+                                            "/main/".to_string(),
+                                            row.path.to_string()
+                                        ].join("");
+    
+                                    let image_view = self.image_view.size_vec2();
+                                    let image_view = egui::ImageButton::new(
+                                        self.image_view.texture_id(ctx),
+                                        [image_view.x / 32., image_view.y / 32.],
+                                    )
+                                    .frame(true);
+
+                                    if ui.add_sized( [2.0, 20.0], image_view, ).clicked()
+                                    {    
+                                        let modifiers = ui.ctx().input().modifiers;
+                                        ui.ctx().output().open_url = Some(egui::output::OpenUrl {
+                                            url: go_url.to_owned(),
+                                            new_tab: modifiers.any(),
+                                        });
+                                    }
+ 
+                                    // ************************************************************************************************ //
+                                    // File Name Title
+                                    // ************************************************************************************************ //
+                                    ui.horizontal(|ui| {
+                                        ui.with_layout(egui::Layout::left_to_right(), |ui| {
+                                            
+                                            if ui
+                                                .add( 
+                                                    //[485.0, 20.0],
+                                                    egui::Button::new(
+                                                        egui::RichText::new(&row.path)
+                                                            .color(egui::Color32::from_rgb(255, 255, 255))
+                                                            .monospace(),
+                                                    )
+                                                    .fill(fill_color),
+                                            ).clicked(){
+                                                let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
+
+                                                let url = [
+                                                    "https://raw.githubusercontent.com/mjehrhart/".to_string(),
+                                                    self.repo_list[self.repo_list_index].to_string(),
+                                                    "/main/".to_string(),
+                                                    row.path.to_string()
+                                                ].join("");
+
+                                                // Send http_img to computer Clipboard
+                                                let http_img = format!(
+                                                        "<img width=\"100%\" alt=\"{name}\" src=\"{download_url}\">",
+                                                        name = row.path,
+                                                        download_url = url
+                                                    );
+
+                                                ctx.set_contents(http_img).unwrap();
+                                            }
+    
+                                        });
+                                    }); 
+
+                                    ui.end_row();
+                                });  
+                                    
+                            }
+
+                            i += 1;
+                        }
+                    
+                    }); 
                  });
+                ui.add_space(55.0);
         });
     }
 
@@ -330,7 +367,7 @@ impl Application {
 
 impl epi::App for Application {
     fn name(&self) -> &str {
-        "AnyFile 1.0.2"
+        "AnyFile 1.0.4"
     }
 
     fn setup(&mut self, _ctx: &egui::Context, _frame: &epi::Frame, _storage: Option<&dyn Storage>) {
@@ -394,7 +431,7 @@ pub fn run(config: crate::config::Config) {
     let options = eframe::NativeOptions {
         initial_window_pos: Some(egui::Pos2::new(0.0, 00.0)),
         resizable: true,
-        initial_window_size: Some(egui::Vec2::new(625.0, 260.0)),
+        initial_window_size: Some(egui::Vec2::new(625.0, 280.0)),
         decorated: true,
         transparent: true,
         drag_and_drop_support: true,
