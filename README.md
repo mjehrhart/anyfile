@@ -9,8 +9,8 @@ An easier way to store and reference asset files from your public repository.
 Drag and Drop any file into the AnyFile app to upload to your GitHub repository.
 (Old Look)  
 
-<img width="60%" alt="images/anyfile_view_drag_and_drop_6VfWv4CA7QEH95Ul.gif" src="https://raw.githubusercontent.com/mjehrhart/assets/main/images/anyfile_view_drag_and_drop_6VfWv4CA7QEH95Ul.gif">. 
-  
+<img width="60%" alt="images/anyfile_v1.0.4_dd_mk64EsNZaQht6yFE.gif" src="https://raw.githubusercontent.com/mjehrhart/assets/main/images/anyfile_v1.0.4_dd_mk64EsNZaQht6yFE.gif">  
+
 ## About
 I needed an easier method to store screenshots and .gifs for github docs: readme, issues, discussions, etc...
 
@@ -23,10 +23,10 @@ Anyfile is writtern purely in Rust!  Egui is the frontend library.
 
 ## Screenshots
 Generate an http image tag by clicking on the file:  
-<img width="60%" alt="images/anyfile_generate_image_tag_prnBBxRbBd1OhPiy.gif" src="https://raw.githubusercontent.com/mjehrhart/assets/main/images/anyfile_generate_image_tag_prnBBxRbBd1OhPiy.gif">
+<img width="60%" alt="images/anyfile_v1.0.4_image_tag_ObOArkWUNbbCWmqV.gif" src="https://raw.githubusercontent.com/mjehrhart/assets/main/images/anyfile_v1.0.4_image_tag_ObOArkWUNbbCWmqV.gif">  
   
 Remove files:  
-<img width="60%" alt="images/anyfile_remove_file_KY0rBEjMEohDeqs0.gif" src="https://raw.githubusercontent.com/mjehrhart/assets/main/images/anyfile_remove_file_KY0rBEjMEohDeqs0.gif">
+<img width="60%" alt="images/Screen Recording 2022-05-01 at 8.35.53 AM_xAOBcchGccgzEPk9.gif" src="https://raw.githubusercontent.com/mjehrhart/assets/main/images/Screen Recording 2022-05-01 at 8.35.53 AM_xAOBcchGccgzEPk9.gif">
   
 ## Installation
 #### Hombebrew
