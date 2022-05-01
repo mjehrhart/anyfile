@@ -6,8 +6,7 @@ An easier way to store and reference asset files from your public repository.
 <img width="60%" alt="images/anyfile_1.0.4_view_yxCv8o9pxc1oiX9u.png" src="https://raw.githubusercontent.com/mjehrhart/assets/main/images/anyfile_1.0.4_view_yxCv8o9pxc1oiX9u.png">. 
 
 
-Drag and Drop any file into the AnyFile app to upload to your GitHub repository.
-(Old Look)  
+Drag and Drop any file into the AnyFile app to upload to your GitHub repository  
 
 <img width="60%" alt="images/anyfile_v1.0.4_dd_mk64EsNZaQht6yFE.gif" src="https://raw.githubusercontent.com/mjehrhart/assets/main/images/anyfile_v1.0.4_dd_mk64EsNZaQht6yFE.gif">  
 
