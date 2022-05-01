@@ -21,10 +21,10 @@ This is a small simple app that I use often to save time, so I decided to share 
 Anyfile is writtern purely in Rust!  Egui is the frontend library.
 
 ## Screenshots
-Generate an http image tag by clicking on the file:  
+Generate an http image tag by clicking on the file name:  
 <img width="60%" alt="images/anyfile_v1.0.4_image_tag_ObOArkWUNbbCWmqV.gif" src="https://raw.githubusercontent.com/mjehrhart/assets/main/images/anyfile_v1.0.4_image_tag_ObOArkWUNbbCWmqV.gif">  
   
-Remove files:  
+Double click to remove files:  
 <img width="60%" alt="images/Screen Recording 2022-05-01 at 8.35.53 AM_xAOBcchGccgzEPk9.gif" src="https://raw.githubusercontent.com/mjehrhart/assets/main/images/Screen Recording 2022-05-01 at 8.35.53 AM_xAOBcchGccgzEPk9.gif">  
   
 View files:  
