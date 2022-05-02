@@ -57,6 +57,7 @@ When the app run for the first time, it will look for and if not found, the app 
 ```
 
 The username should be the same as your GitHub username. The auth_token is a GitHub personal auth token. And email and author can be whatever you want for the official commit.
+
 This is a basic setup for the config, something I did quickly to get the project going. I'd be happy to hear more ways to handle the config file.
 
 If you have any question, comments, or concerns please visit here:  
