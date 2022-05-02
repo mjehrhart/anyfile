@@ -1,8 +1,10 @@
 // build.rs
-use std::fs::{File};
+// 0.0.1
+use std::fs::File;
 use std::io::prelude::*;
 use std::process::Command;
 
+#[cfg(target_os = "macos")]
 fn main() {
     //Create Folder Stucture
     let mut mkdir = Command::new("mkdir");

@@ -64,7 +64,7 @@ checksum = "000444226fcff248f2bc4c7625be32c63caccfecc2723a2b9f78a7487a49c407"
 
 [[package]]
 name = "anyfile"
-version = "1.0.4"
+version = "1.0.5"
 dependencies = [
  "base64",
  "clipboard",
