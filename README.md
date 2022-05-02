@@ -49,6 +49,16 @@ brew uninstall mjehrhart/anyfile/anyfile
 brew install mjehrhart/anyfile/anyfile
 ``` 
 
+## Config
+When the app run for the first time, it will look for and if not found, the app will create an empty config file located in your home directory ~/.anyfile/config.json.
+
+```json 
+{ "author" : "", "auth_token": "", "email": "", "username": "", }
+```
+
+The username should be the same as your GitHub username. The auth_token is a GitHub personal auth token. And email and author can be whatever you want for the official commit.
+This is a basic setup for the config, something I did quickly to get the project going. I'd be happy to hear more ways to handle the config file.
+
 If you have any question, comments, or concerns please visit here:  
 https://github.com/mjehrhart/anyfile/discussions/ 
 
