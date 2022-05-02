@@ -40,13 +40,13 @@ brew install mjehrhart/anyfile/anyfile
 #### Upgrade
 ```
 brew update
-brew upgrade mjehrhart/anyfile/anyfile
+brew upgrade anyfile
 ```
 or
 
 ```
-brew uninstall mjehrhart/anyfile/anyfile
-brew install mjehrhart/anyfile/anyfile
+brew uninstall anyfile
+brew install anyfile
 ``` 
 
 ## Config
