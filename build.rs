@@ -1,5 +1,5 @@
 // build.rs
-// 0.0.1
+// 0.0.2
 use std::fs::File;
 use std::io::prelude::*;
 use std::process::Command;
@@ -45,11 +45,11 @@ fn main() {
     <plist version=\"1.0\">
     <dict>
         <key>CFBundleDisplayName</key>
-        <string>sandbox</string>
+        <string>anyfile</string>
         <key>CFBundleName</key>
-        <string>sandbox</string>
+        <string>anyfile</string>
         <key>CFBundleExecutable</key>
-        <string>sandbox</string>
+        <string>anyfile</string>
         <key>CFBundleIconFile</key>
         <string>folder2.ico</string>
     </dict>
